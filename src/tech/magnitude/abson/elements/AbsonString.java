@@ -10,7 +10,7 @@ public class AbsonString implements Absonifyable {
 	
 	String string;
 	
-	private static final String[] escapable = {"\"", "\\", "/", "\b", "\f", "\n", "\r", "\t"};
+	private static final String[] escapable = {"\"", "\\\\", "/", "\b", "\f", "\n", "\r", "\t"};
 	private static final String[] escaped = {"\\\"", "\\\\", "\\/", "\\b", "\\f", "\\n", "\\r", "\\t"};
 	
 	public AbsonString(String value) {

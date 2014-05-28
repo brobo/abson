@@ -27,31 +27,31 @@ public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable 
 		super(Arrays.asList(initialArray));
 	}
 	
-	public void addInteger(int val) {
+	public void add(int val) {
 		add(new Abson32Integer(val));
 	}
 	
-	public void addLong(long val) {
+	public void add(long val) {
 		add(new Abson64Integer(val));
 	}
 	
-	public void addString(String val) {
+	public void add(String val) {
 		add(new AbsonString(val));
 	}
 	
-	public void addDouble(double val) {
+	public void add(double val) {
 		add(new AbsonFloatingPoint(val));
 	}
 	
-	public void addDate(Date date) {
+	public void add(Date date) {
 		add(new AbsonUTCDatetime(date));
 	}
 	
-	public void addBoolean(boolean value) {
+	public void add(boolean value) {
 		add(new AbsonBoolean(value));
 	}
 	
-	public void addArray(AbsonArray array) {
+	public void add(AbsonArray array) {
 		add(array);
 	}
 	
@@ -71,14 +71,15 @@ public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable 
 
 	@Override
 	public String toJson() {
-		String res = "[";
+		StringBuilder res = new StringBuilder("[");
 		for (Absonifyable value : this) {
-			res += value.toJson() + ",";
+			res.append(value.toJson());
+			res.append(",");
 		}
 		if (res.length() > 1) {
-			res = res.substring(0, res.length()-1);
+			res.deleteCharAt(res.length() - 1);
 		}
-		res += "]";
-		return res;
+		res.append("]");
+		return res.toString();
 	}
 }

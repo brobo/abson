@@ -19,8 +19,9 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 			temp.write(BsonUtil.toBinaryCString(entry.getKey()));
 			entry.getValue().toBson(temp);
 		}
-		stream.write(BsonUtil.toBinaryInt32(temp.size()));
+		stream.write(BsonUtil.toBinaryInt32(temp.size() + 5));
 		stream.write(temp.toByteArray());
+		stream.write(0x00);
 	}
 
 	@Override
@@ -46,6 +47,10 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 	
 	public void put(String key, double value) {
 		put(key, new AbsonFloatingPoint(value));
+	}
+	
+	public void put(String key, Date date) {
+		put(key, new AbsonUTCDatetime(date));
 	}
 	
 	public void put(String key, Absonifyable[] arr) {
@@ -82,14 +87,14 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 
 	@Override
 	public String toJson() {
-		String res = "{";
+		StringBuilder res = new StringBuilder("{");
 		for (Map.Entry<String, Absonifyable> entry : entrySet()) {
-			res += entry.getKey() + ":" + entry.getValue().toJson() + ",";
+			res.append("\"" + entry.getKey() + "\":" + entry.getValue().toJson() + ",");
 		}
 		if (res.length() > 1) {
-			res = res.substring(0, res.length()-1);
+			res.deleteCharAt(res.length() - 1);
 		}
-		res += "}";
-		return res;
+		res.append("}");
+		return res.toString();
 	}
 }

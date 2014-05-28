@@ -1,5 +1,6 @@
 package tech.magnitude.abson;
 
+import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 
 public class BsonUtil {
@@ -38,23 +39,19 @@ public class BsonUtil {
 	
 	public static byte[] toBinaryInt32(int source) {
 		byte[] res = new byte[4];
-		res[0] = (byte)(source >> 24);
-		res[1] = (byte)(source >> 16 & 0xff);
-		res[2] = (byte)(source >> 8 & 0xff);
-		res[3] = (byte)(source & 0xff);
+		for (int i=0; i<4; i++) {
+			res[i] = (byte)(source & 0xff);
+			source >>= 8;
+		}
 		return res;
 	}
 	
 	public static byte[] toBinaryInt64(long source) {
 		byte[] res = new byte[8];
-		res[0] = (byte)(source >> 56);
-		res[1] = (byte)(source >> 48 & 0xff);
-		res[2] = (byte)(source >> 40 & 0xff);
-		res[3] = (byte)(source >> 32 & 0xff);
-		res[4] = (byte)(source >> 24 & 0xff);
-		res[5] = (byte)(source >> 16 & 0xff);
-		res[6] = (byte)(source >> 8 & 0xff);
-		res[7] = (byte)(source & 0xff);
+		for (int i=0; i<8; i++) {
+			res[i] = (byte)(source & 0xff);
+			source >>= 8;
+		}
 		return res;
 		
 	}
@@ -69,5 +66,17 @@ public class BsonUtil {
 		for (int i=0; i<8; i++) 
 			res[i] = (byte)((lng >> ((7 - i) * 8)) * 0xff);
 		return res;
+	}
+	
+	public static String byteString(ByteArrayOutputStream stream) {
+		return byteString(stream.toByteArray());
+	}
+	
+	public static String byteString(byte[] bytes) {
+		StringBuilder res = new StringBuilder();
+		for (byte cur : bytes) {
+			res.append(String.format("\\x%02x", cur));
+		}
+		return res.toString();
 	}
 }
