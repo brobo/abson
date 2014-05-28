@@ -2,6 +2,7 @@ package tech.magnitude.abson.elements;
 
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 
@@ -36,5 +37,15 @@ public class AbsonUTCDatetime implements Absonifyable {
 	
 	public Date getValue() {
 		return new Date(value);
+	}
+	
+	public static AbsonUTCDatetime fromJson(String json) {
+		return new AbsonUTCDatetime(Long.parseLong(json));
+	}
+	
+	public static AbsonUTCDatetime fromBson(InputStream stream) throws IOException {
+		byte[] bytes = new byte[8];
+		stream.read(bytes);
+		return new AbsonUTCDatetime(BsonUtil.fromBinaryInt64(bytes));
 	}
 }

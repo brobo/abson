@@ -1,5 +1,6 @@
 package tech.magnitude.abson.elements;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 import tech.magnitude.abson.Absonifyable;
@@ -30,5 +31,15 @@ public class Abson32Integer implements Absonifyable {
 	
 	public int getValue() {
 		return value;
+	}
+	
+	public static Abson32Integer fromJson(String json) {
+		return new Abson32Integer(Integer.parseInt(json));
+	}
+	
+	public static Abson32Integer fromBson(InputStream stream) throws IOException {
+		byte[] bytes = new byte[4];
+		stream.read(bytes);
+		return new Abson32Integer(BsonUtil.fromBinaryInt32(bytes));
 	}
 }

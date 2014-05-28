@@ -1,6 +1,7 @@
 package tech.magnitude.abson.elements;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 import tech.magnitude.abson.Absonifyable;
@@ -31,6 +32,14 @@ public class AbsonBoolean implements Absonifyable {
 	
 	public boolean getValue() {
 		return value;
+	}
+	
+	public static AbsonBoolean fromJson(String json) {
+		return new AbsonBoolean(json.equals("true"));
+	}
+	
+	public static AbsonBoolean fromBson(InputStream stream) throws IOException {
+		return new AbsonBoolean(stream.read() != 0x00);
 	}
 
 }

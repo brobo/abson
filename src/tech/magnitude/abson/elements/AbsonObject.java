@@ -2,6 +2,7 @@ package tech.magnitude.abson.elements;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.LinkedHashMap;

@@ -1,7 +1,10 @@
 package tech.magnitude.abson;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 
 public class BsonUtil {
 
@@ -46,6 +49,15 @@ public class BsonUtil {
 		return res;
 	}
 	
+	public static int fromBinaryInt32(byte[] bytes) {
+		int res = 0;
+		for (int i=0; i<4; i++) {
+			res |= bytes[i];
+			res <<= 4;
+		}
+		return res;
+	}
+	
 	public static byte[] toBinaryInt64(long source) {
 		byte[] res = new byte[8];
 		for (int i=0; i<8; i++) {
@@ -53,7 +65,15 @@ public class BsonUtil {
 			source >>= 8;
 		}
 		return res;
-		
+	}
+	
+	public static long fromBinaryInt64(byte[] bytes) {
+		int res = 0;
+		for (int i=0; i<8; i++) {
+			res |= bytes[i];
+			res <<= 4;
+		}
+		return res;
 	}
 	
 	public static byte[] toBinaryBoolean(boolean source) {
@@ -61,11 +81,13 @@ public class BsonUtil {
 	}
 	
 	public static byte[] toBinaryFloatingPoint(double source) {
-		long lng = Double.doubleToLongBits(source);
 		byte[] res = new byte[8];
-		for (int i=0; i<8; i++) 
-			res[i] = (byte)((lng >> ((7 - i) * 8)) * 0xff);
+		ByteBuffer.wrap(res).putDouble(source);
 		return res;
+	}
+	
+	public static double fromBinaryFloatingPoint(byte[] bytes) {
+		return ByteBuffer.wrap(bytes).getDouble();
 	}
 	
 	public static String byteString(ByteArrayOutputStream stream) {
@@ -78,5 +100,15 @@ public class BsonUtil {
 			res.append(String.format("\\x%02x", cur));
 		}
 		return res.toString();
+	}
+	
+	public static String readCString(InputStream stream) throws IOException {
+		String res = "";
+		while (true) {
+			int c = stream.read();
+			if (c == 0x00) break;
+			res += (char)c;
+		}
+		return res;
 	}
 }
