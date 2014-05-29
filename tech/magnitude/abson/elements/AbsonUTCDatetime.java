@@ -4,20 +4,25 @@ package tech.magnitude.abson.elements;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.util.Date;
 
 import tech.magnitude.abson.Absonifyable;
 import tech.magnitude.abson.BsonUtil;
+import tech.magnitude.abson.JsonPrintSettings;
 
 public class AbsonUTCDatetime implements Absonifyable {
 	long value;
-
+	Date realValue;
+	
 	public AbsonUTCDatetime(long value) {
 		this.value = value;
+		realValue = new Date(value);
 	}
 	
 	public AbsonUTCDatetime(Date date) {
 		value = date.getTime();
+		realValue = date;
 	}
 	
 	@Override
@@ -31,12 +36,26 @@ public class AbsonUTCDatetime implements Absonifyable {
 	}
 
 	@Override
-	public String toJson() {
-		return "" + value;
+	public void toJson(Writer writer, JsonPrintSettings settings) throws IOException {
+		writer.write(toJson(settings));
 	}
 	
+	public String toJson() {
+		return toJson(JsonPrintSettings.DEFAULT);
+	}
+	
+	public String toJson(JsonPrintSettings settings) {
+		return Long.toString(value);
+	}
+	
+	@Override
+	public String toString() {
+		return toJson();
+	}
+	
+	
 	public Date getValue() {
-		return new Date(value);
+		return realValue;
 	}
 	
 	public static AbsonUTCDatetime fromJson(String json) {

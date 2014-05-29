@@ -2,12 +2,15 @@ package tech.magnitude.abson.elements;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
 import tech.magnitude.abson.Absonifyable;
+import tech.magnitude.abson.JsonPrintSettings;
+import tech.magnitude.abson.PrintUtil;
 
 public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable {
 
@@ -59,7 +62,7 @@ public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable 
 	public void toBson(OutputStream stream) throws IOException {
 		AbsonObject obj = new AbsonObject();
 		for (int i=0; i<size(); i++) {
-			obj.put("" + i, get(i));
+			obj.put(Integer.toString(i), get(i));
 		}
 		obj.toBson(stream);
 	}
@@ -69,17 +72,58 @@ public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable 
 		return 0x04;
 	}
 
-	@Override
 	public String toJson() {
-		StringBuilder res = new StringBuilder("[");
+		return toJson(JsonPrintSettings.DEFAULT);
+	}
+	
+	public String toJson(JsonPrintSettings settings) {
+		return PrintUtil.getString(this, settings);
+	}
+	
+	@Override
+	public String toString() {
+		return toJson();
+	}
+	
+	@Override
+	public void toJson(Writer output, JsonPrintSettings settings) throws IOException {
+		if(settings.isMultiline()) {
+			toMultilineJson(output, settings);
+			return;
+		}
+		
+		boolean first = true;
+		output.write(settings.hasWhitespace() ? "[ " : "[");
+		
+		final JsonPrintSettings nextSettings = new JsonPrintSettings(settings, settings.getIndent() + settings.getStartIndent());
 		for (Absonifyable value : this) {
-			res.append(value.toJson());
-			res.append(",");
+			if(!first) output.write(settings.hasWhitespace() ? ", " : ",");
+			value.toJson(output, nextSettings);
+			first = false;
 		}
-		if (res.length() > 1) {
-			res.deleteCharAt(res.length() - 1);
+		
+		output.write(settings.hasWhitespace() ? " ]" : "]");
+	}
+	
+	protected void toMultilineJson(Writer output, JsonPrintSettings settings) throws IOException {
+		output.write("[\n");
+		
+		int count = 0;
+		
+		final JsonPrintSettings nextSettings = new JsonPrintSettings(settings, settings.getIndent() + settings.getStartIndent());
+		for (Absonifyable value : this) {
+			PrintUtil.indent(output, nextSettings.getStartIndent());
+			
+			value.toJson(output, nextSettings);
+			
+			if(count != this.size() - 1)
+				output.write(",");
+			output.write("\n");
+			
+			count++;
 		}
-		res.append("]");
-		return res.toString();
+		
+		PrintUtil.indent(output, settings.getStartIndent());
+		output.write("]");
 	}
 }

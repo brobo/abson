@@ -3,9 +3,12 @@ package tech.magnitude.abson.elements;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Writer;
 
 import tech.magnitude.abson.Absonifyable;
 import tech.magnitude.abson.BsonUtil;
+import tech.magnitude.abson.JsonPrintSettings;
+import tech.magnitude.abson.PrintUtil;
 
 public class AbsonString implements Absonifyable {
 	
@@ -29,12 +32,15 @@ public class AbsonString implements Absonifyable {
 	}
 
 	@Override
-	public String toJson() {
+	public void toJson(Writer writer, JsonPrintSettings settings) throws IOException {
 		String res = string;
 		for (int i=0; i<escapable.length; i++) {
 			res = res.replaceAll(escapable[i], escaped[i]);
 		}
-		return "\"" + res + "\"";
+		
+		writer.write("\"");
+		writer.write(res);
+		writer.write("\"");
 	}
 	
 	public String getValue() {
@@ -59,5 +65,18 @@ public class AbsonString implements Absonifyable {
 		}
 		stream.read();
 		return new AbsonString(res);
+	}
+
+	public String toJson() {
+		return toJson(JsonPrintSettings.DEFAULT);
+	}
+	
+	public String toJson(JsonPrintSettings settings) {
+		return PrintUtil.getString(this, settings);
+	}
+	
+	@Override
+	public String toString() {
+		return toJson();
 	}
 }

@@ -2,14 +2,16 @@ package tech.magnitude.abson.elements;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import tech.magnitude.abson.Absonifyable;
 import tech.magnitude.abson.BsonUtil;
+import tech.magnitude.abson.JsonPrintSettings;
+import tech.magnitude.abson.PrintUtil;
 
 public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements Absonifyable {
 
@@ -85,17 +87,64 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 	public Date getDate(String key) {
 		return ((AbsonUTCDatetime) get(key)).getValue();
 	}
+	
+	public String toJson() {
+		return PrintUtil.getString(this, JsonPrintSettings.DEFAULT);
+	}
+	
+	public String toJson(JsonPrintSettings settings) {
+		return PrintUtil.getString(this, settings);
+	}
+	
+	@Override
+	public String toString() {
+		return toJson(JsonPrintSettings.DEFAULT);
+	}
 
 	@Override
-	public String toJson() {
-		StringBuilder res = new StringBuilder("{");
+	public void toJson(Writer writer, JsonPrintSettings settings) throws IOException {
+		if(settings.isMultiline()) {
+			toMultilineJson(writer, settings);
+			return;
+		}
+		
+		final JsonPrintSettings nextSettings = new JsonPrintSettings(settings, settings.getIndent() + settings.getStartIndent());
+		
+		writer.write(settings.hasWhitespace() ? "{ " : "{");
+		
+		boolean first = true;
 		for (Map.Entry<String, Absonifyable> entry : entrySet()) {
-			res.append("\"" + entry.getKey() + "\":" + entry.getValue().toJson() + ",");
+			if(!first) writer.write(settings.hasWhitespace() ? ", " : ",");
+			writer.write("\"");
+			writer.write(entry.getKey());
+			writer.write(settings.hasWhitespace() ? "\": " : "\":");
+			entry.getValue().toJson(writer, nextSettings);
+			first = false;
 		}
-		if (res.length() > 1) {
-			res.deleteCharAt(res.length() - 1);
+		
+		writer.write(settings.hasWhitespace() ? " }" : "}");
+	}
+	
+	protected void toMultilineJson(Writer writer, JsonPrintSettings settings) throws IOException {
+		writer.write("{\n");
+		
+		final JsonPrintSettings nextSettings = new JsonPrintSettings(settings, settings.getIndent() + settings.getStartIndent());
+		
+		int count = 0;
+		for (Map.Entry<String, Absonifyable> entry : entrySet()) {
+			PrintUtil.indent(writer, nextSettings.getStartIndent());
+			
+			writer.write("\"");
+			writer.write(entry.getKey());
+			writer.write(settings.hasWhitespace() ? "\": " : "\":");
+			entry.getValue().toJson(writer, nextSettings);
+			
+			if(count != this.size() - 1)
+				writer.write(",");
+			writer.write("\n");
 		}
-		res.append("}");
-		return res.toString();
+		
+		PrintUtil.indent(writer, settings.getStartIndent());
+		writer.write("}");
 	}
 }
