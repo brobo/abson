@@ -12,8 +12,9 @@ import tech.magnitude.abson.BsonUtil;
 import tech.magnitude.abson.JsonPrintSettings;
 
 public class AbsonUTCDatetime implements Absonifyable {
-	long value;
-	Date realValue;
+	
+	protected long value;
+	protected Date realValue;
 	
 	public AbsonUTCDatetime(long value) {
 		this.value = value;

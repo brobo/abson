@@ -10,7 +10,8 @@ import tech.magnitude.abson.BsonUtil;
 import tech.magnitude.abson.JsonPrintSettings;
 
 public class Abson64Integer implements Absonifyable {
-	long value;
+	
+	protected long value;
 
 	public Abson64Integer(long value) {
 		this.value = value;

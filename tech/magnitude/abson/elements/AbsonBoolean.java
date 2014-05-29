@@ -11,7 +11,7 @@ import tech.magnitude.abson.JsonPrintSettings;
 
 public class AbsonBoolean implements Absonifyable {
 
-	boolean value;
+	protected boolean value;
 	
 	public AbsonBoolean(boolean val) {
 		this.value = val;

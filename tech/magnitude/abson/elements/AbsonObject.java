@@ -1,6 +1,5 @@
 package tech.magnitude.abson.elements;
 
-import java.util.List;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,6 +15,14 @@ import tech.magnitude.abson.PrintUtil;
 
 public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements Absonifyable {
 
+	public AbsonObject() {
+		super();
+	}
+	
+	public AbsonObject(Map<String, ? extends Absonifyable> map) {
+		super(map);
+	}
+	
 	public void toBson(OutputStream stream) throws IOException {
 		ByteArrayOutputStream temp = new ByteArrayOutputStream();
 		for (Map.Entry<String, Absonifyable> entry : entrySet()) {

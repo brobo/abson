@@ -10,7 +10,7 @@ import tech.magnitude.abson.JsonPrintSettings;
 
 public class AbsonFloatingPoint implements Absonifyable {
 
-	double value;
+	protected double value;
 	
 	public AbsonFloatingPoint(double value) {
 		this.value = value;

@@ -11,7 +11,7 @@ import tech.magnitude.abson.JsonPrintSettings;
 
 public class Abson32Integer implements Absonifyable {
 
-	int value;
+	protected int value;
 	
 	public Abson32Integer(int value) {
 		this.value = value;
