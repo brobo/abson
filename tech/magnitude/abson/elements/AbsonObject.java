@@ -147,6 +147,8 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 			if(count != this.size() - 1)
 				writer.write(",");
 			writer.write("\n");
+			
+			count++;
 		}
 		
 		PrintUtil.indent(writer, settings.getStartIndent());
