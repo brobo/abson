@@ -204,6 +204,10 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 		return res;
 	}
 	
+	public static AbsonObject fromBson(byte[] bson) throws IOException {
+		return AbsonObject.fromBson(new ByteArrayInputStream(bson));
+	}
+	
 	public static AbsonObject fromJson(String token) throws AbsonParseException {
 		try {
 			return new JsonParser(token).readObject();

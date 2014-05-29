@@ -76,4 +76,19 @@ public class AbsonUTCDatetime implements Absonifyable {
 		stream.read(bytes);
 		return new AbsonUTCDatetime(BsonUtil.fromBinaryInt64(bytes));
 	}
+
+	@Override
+	public int hashCode() {
+		return realValue.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof AbsonUTCDatetime) {
+			return realValue.equals(((AbsonUTCDatetime)obj).realValue);
+		}
+		return false;
+	}
+	
+	
 }

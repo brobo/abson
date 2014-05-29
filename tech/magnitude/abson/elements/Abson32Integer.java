@@ -87,4 +87,19 @@ public class Abson32Integer implements Absonifyable, AbsonNumber<Integer> {
 	public double getDoubleValue() {
 		return getValue();
 	}
+
+	@Override
+	public int hashCode() {
+		return new Integer(value).hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Abson32Integer) {
+			return value == ((Abson32Integer)obj).value;
+		}
+		return false;
+	}
+	
+	
 }

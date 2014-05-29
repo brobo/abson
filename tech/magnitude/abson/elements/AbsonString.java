@@ -93,4 +93,19 @@ public class AbsonString implements Absonifyable {
 	public String toString() {
 		return toJson();
 	}
+
+	@Override
+	public int hashCode() {
+		return string.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof AbsonString) {
+			return string.equals(((AbsonString)obj).string);
+		}
+		return false;
+	}
+	
+	
 }

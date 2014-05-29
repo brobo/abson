@@ -87,4 +87,19 @@ public class Abson64Integer implements Absonifyable, AbsonNumber<Long> {
 	public double getDoubleValue() {
 		return getValue();
 	}
+
+	@Override
+	public int hashCode() {
+		return new Long(value).hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Abson64Integer) {
+			return value == ((Abson64Integer)obj).value;
+		}
+		return false;
+	}
+	
+	
 }

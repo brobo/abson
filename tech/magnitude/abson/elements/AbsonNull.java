@@ -59,4 +59,16 @@ public class AbsonNull implements Absonifyable {
 		return null;
 	}
 
+	@Override
+	public int hashCode() {
+		return -1;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof AbsonNull;
+	}
+	
+	
+
 }

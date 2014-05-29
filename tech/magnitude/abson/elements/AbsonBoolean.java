@@ -65,4 +65,19 @@ public class AbsonBoolean implements Absonifyable {
 		return new AbsonBoolean(stream.read() != 0x00);
 	}
 
+	@Override
+	public int hashCode() {
+		return new Boolean(value).hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof AbsonBoolean) {
+			return value == ((AbsonBoolean)obj).value;
+		}
+		return false;
+	}
+	
+	
+
 }

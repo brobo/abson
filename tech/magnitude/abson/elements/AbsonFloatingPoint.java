@@ -87,4 +87,19 @@ public class AbsonFloatingPoint implements Absonifyable, AbsonNumber<Double> {
 	public double getDoubleValue() {
 		return getValue();
 	}
+
+	@Override
+	public int hashCode() {
+		return new Double(value).hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof AbsonFloatingPoint) {
+			return value == ((AbsonFloatingPoint)obj).value;
+		}
+		return false;
+	}
+	
+	
 }

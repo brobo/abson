@@ -22,6 +22,11 @@ public class Test {
 			foo.put("nothing");
 			System.out.println(foo.toJson());
 			System.out.println(AbsonObject.fromJson(foo.toJson()).toJson());
+			System.out.println(foo.equals(AbsonObject.fromJson(foo.toJson())));
+			System.out.println(foo.equals(AbsonObject.fromBson(foo.toBson())));
+			String old = foo.toJson();
+			foo.put("SomethingNew", "NEW!");
+			System.out.println(foo.equals(AbsonObject.fromJson(old)));
 		}
 		
 		if (false) {
