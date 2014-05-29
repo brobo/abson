@@ -60,6 +60,10 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 		put(key, new AbsonArray(arr));
 	}
 	
+	public void put(String key, List<Absonifyable> arr) {
+		put(key, new AbsonArray(arr));
+	}
+	
 	public int getInteger(String key) {
 		return ((Abson32Integer) get(key)).getValue();
 	}
@@ -82,6 +86,10 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 	
 	public String getString(String key) {
 		return ((AbsonString) get(key)).getValue();
+	}
+	
+	public AbsonObject getObject(String key) {
+		return (AbsonObject) get(key);
 	}
 	
 	public Date getDate(String key) {

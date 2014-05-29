@@ -58,6 +58,38 @@ public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable 
 		add(array);
 	}
 	
+	public int getInteger(int index) {
+		return ((Abson32Integer) get(index)).getValue();
+	}
+	
+	public long getLong(int index) {
+		return ((Abson64Integer) get(index)).getValue();
+	}
+	
+	public String getString(int index) {
+		return ((AbsonString) get(index)).getValue();
+	}
+	
+	public double getDouble(int index) {
+		return ((AbsonFloatingPoint) get(index)).getValue();
+	}
+	
+	public Date getDate(int index) {
+		return ((AbsonUTCDatetime) get(index)).getValue();
+	}
+	
+	public boolean getBoolean(int index) {
+		return ((AbsonBoolean) get(index)).getValue();
+	}
+	
+	public AbsonArray getArray(int index) {
+		return ((AbsonArray) get(index));
+	}
+	
+	public AbsonObject getObject(int index) {
+		return (AbsonObject) get(index);
+	}
+	
 	@Override
 	public void toBson(OutputStream stream) throws IOException {
 		AbsonObject obj = new AbsonObject();
