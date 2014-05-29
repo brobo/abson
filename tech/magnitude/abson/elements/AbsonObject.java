@@ -13,6 +13,8 @@ import java.util.Map;
 import tech.magnitude.abson.Absonifyable;
 import tech.magnitude.abson.BsonUtil;
 import tech.magnitude.abson.JsonPrintSettings;
+import tech.magnitude.abson.JsonTokenizer;
+import tech.magnitude.abson.JsonUtil;
 import tech.magnitude.abson.PrintUtil;
 
 public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements Absonifyable {
@@ -156,6 +158,22 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 				value = new AbsonBoolean(false);
 			}
 			res.put(name, value);
+		}
+		return res;
+	}
+	
+	public static AbsonObject fromJson(String token) {
+		JsonTokenizer tokenizer = new JsonTokenizer(token.substring(1, token.length()-1));
+		AbsonObject res = new AbsonObject();
+		while (tokenizer.hasNext()) {
+			String key = tokenizer.getNextToken();
+			if (key.startsWith("\"") && key.endsWith("\"")) {
+				key = key.substring(1, key.length()-1);
+			}
+			tokenizer.pop();
+			Absonifyable value = JsonUtil.assignToAbsonifyable(tokenizer.getNextToken());
+			tokenizer.pop();
+			res.put(key, value);
 		}
 		return res;
 	}

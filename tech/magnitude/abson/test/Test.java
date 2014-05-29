@@ -20,9 +20,10 @@ public class Test {
 			books.add("Moby Dick");
 			foo.put("books", books);
 			System.out.println(foo.toJson());
+			System.out.println(AbsonObject.fromJson(foo.toJson()).toJson());
 		}
 		
-		if (true) {
+		if (false) {
 			AbsonObject hello = new AbsonObject();
 			hello.put("hello", "world");
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -34,7 +35,7 @@ public class Test {
 			System.out.println(goodbye.toJson());
 		}
 		
-		if (true) {
+		if (false) {
 			AbsonObject bson = new AbsonObject();
 			AbsonArray awesome = new AbsonArray();
 			awesome.add("awesome");

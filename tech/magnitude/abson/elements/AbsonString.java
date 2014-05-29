@@ -49,10 +49,10 @@ public class AbsonString implements Absonifyable {
 	}
 	
 	public static AbsonString fromJson(String json) {
-		String res = json;
-		for (int i=0; i<escapable.length; i++) {
+		String res = json.substring(1, json.length()-1);
+		/*for (int i=0; i<escapable.length; i++) {
 			res = res.replaceAll("\\" + escapable[i], escapable[i]);
-		}
+		}*/
 		return new AbsonString(res);
 	}
 	

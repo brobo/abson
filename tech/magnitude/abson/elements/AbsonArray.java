@@ -11,6 +11,8 @@ import java.util.Date;
 
 import tech.magnitude.abson.Absonifyable;
 import tech.magnitude.abson.JsonPrintSettings;
+import tech.magnitude.abson.JsonTokenizer;
+import tech.magnitude.abson.JsonUtil;
 import tech.magnitude.abson.PrintUtil;
 
 public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable {
@@ -122,6 +124,18 @@ public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable 
 		AbsonObject temp = AbsonObject.fromBson(stream);
 		AbsonArray res = new AbsonArray();
 		for (Absonifyable value : temp.values()) {
+			res.add(value);
+		}
+		return res;
+	}
+	
+	public static AbsonArray fromJson(String json) {
+		AbsonArray res = new AbsonArray();
+		if (json.charAt(0) != '[' || json.charAt(json.length()-1) != ']') return res; //TODO throw error
+		JsonTokenizer tokenizer = new JsonTokenizer(json.substring(1, json.length()-1));
+		while (tokenizer.hasNext()) {
+			Absonifyable value = JsonUtil.assignToAbsonifyable(tokenizer.getNextToken());
+			tokenizer.pop();
 			res.add(value);
 		}
 		return res;

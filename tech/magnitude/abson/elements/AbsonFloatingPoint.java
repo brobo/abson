@@ -46,6 +46,10 @@ public class AbsonFloatingPoint implements Absonifyable {
 		return new AbsonFloatingPoint(BsonUtil.fromBinaryFloatingPoint(bytes));
 	}
 	
+	public static AbsonFloatingPoint fromJson(String json) {
+		return new AbsonFloatingPoint(Double.parseDouble(json));
+	}
+	
 	@Override
 	public String toString() {
 		return toJson();
