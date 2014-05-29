@@ -1,7 +1,9 @@
 package tech.magnitude.abson.elements;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Date;
@@ -111,6 +113,51 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 	@Override
 	public String toString() {
 		return toJson(JsonPrintSettings.DEFAULT);
+	}
+	
+	public static AbsonObject fromBson(InputStream stream) throws IOException {
+		AbsonObject res = new AbsonObject();
+		byte[] lengthArr = new byte[4];
+		stream.read(lengthArr);
+		int length = BsonUtil.fromBinaryInt32(lengthArr) - 4;
+		byte[] subportion = new byte[length];
+		stream.read(subportion);
+		InputStream toRead = new ByteArrayInputStream(subportion);
+		while (toRead.available() > 1) {
+			int type = toRead.read();
+			String name = BsonUtil.readCString(toRead);
+			Absonifyable value;
+			switch (type) {
+			case 0x01:
+				value = AbsonFloatingPoint.fromBson(toRead);
+				break;
+			case 0x02:
+				value = AbsonString.fromBson(toRead);
+				break;
+			case 0x03:
+				value = AbsonObject.fromBson(toRead);
+				break;
+			case 0x04:
+				value = AbsonArray.fromBson(toRead);
+				break;
+			case 0x08:
+				value = AbsonBoolean.fromBson(toRead);
+				break;
+			case 0x09:
+				value = AbsonUTCDatetime.fromBson(toRead);
+				break;
+			case 0x10:
+				value = Abson32Integer.fromBson(toRead);
+				break;
+			case 0x12:
+				value = Abson64Integer.fromBson(toRead);
+				break;
+			default:
+				value = new AbsonBoolean(false);
+			}
+			res.put(name, value);
+		}
+		return res;
 	}
 
 	@Override

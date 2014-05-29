@@ -44,16 +44,16 @@ public class BsonUtil {
 		byte[] res = new byte[4];
 		for (int i=0; i<4; i++) {
 			res[i] = (byte)(source & 0xff);
-			source >>= 8;
+			source >>>= 8;
 		}
 		return res;
 	}
 	
 	public static int fromBinaryInt32(byte[] bytes) {
 		int res = 0;
-		for (int i=0; i<4; i++) {
-			res |= bytes[i];
-			res <<= 4;
+		for (int i=3; i>=0; i--) {
+			res <<= 8;
+			res |= bytes[i] & 0xff;
 		}
 		return res;
 	}
@@ -62,16 +62,16 @@ public class BsonUtil {
 		byte[] res = new byte[8];
 		for (int i=0; i<8; i++) {
 			res[i] = (byte)(source & 0xff);
-			source >>= 8;
+			source >>>= 8;
 		}
 		return res;
 	}
 	
 	public static long fromBinaryInt64(byte[] bytes) {
-		int res = 0;
-		for (int i=0; i<8; i++) {
-			res |= bytes[i];
-			res <<= 4;
+		long res = 0;
+		for (int i=7; i>=0; i--) {
+			res <<= 8;
+			res |= bytes[i] & 0xff;
 		}
 		return res;
 	}

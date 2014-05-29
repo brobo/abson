@@ -1,6 +1,7 @@
 package tech.magnitude.abson.elements;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 
@@ -37,6 +38,12 @@ public class AbsonFloatingPoint implements Absonifyable {
 	
 	public String toJson(JsonPrintSettings settings) {
 		return settings.shouldRoundFractions() ? String.format("%." + settings.getRoundAmount() + "f", value) : Double.toString(value);
+	}
+	
+	public static AbsonFloatingPoint fromBson(InputStream stream) throws IOException {
+		byte[] bytes = new byte[8];
+		stream.read(bytes);
+		return new AbsonFloatingPoint(BsonUtil.fromBinaryFloatingPoint(bytes));
 	}
 	
 	@Override

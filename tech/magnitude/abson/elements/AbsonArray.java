@@ -1,6 +1,7 @@
 package tech.magnitude.abson.elements;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -115,6 +116,15 @@ public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable 
 	@Override
 	public String toString() {
 		return toJson();
+	}
+	
+	public static AbsonArray fromBson(InputStream stream) throws IOException {
+		AbsonObject temp = AbsonObject.fromBson(stream);
+		AbsonArray res = new AbsonArray();
+		for (Absonifyable value : temp.values()) {
+			res.add(value);
+		}
+		return res;
 	}
 	
 	@Override
