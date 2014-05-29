@@ -56,15 +56,17 @@ public class AbsonString implements Absonifyable {
 	}
 	
 	public static AbsonString fromBson(InputStream stream) throws IOException {
-		String res = "";
 		byte[] lengthArr = new byte[4];
 		stream.read(lengthArr);
 		int length = BsonUtil.fromBinaryInt32(lengthArr);
+		
+		StringBuilder builder = new StringBuilder(length);
 		for (int i=1; i<length; i++) { //Ignore the 0x00
-			res += (char)stream.read();
+			builder.append((char) stream.read());
 		}
+		
 		stream.read();
-		return new AbsonString(res);
+		return new AbsonString(builder.toString());
 	}
 
 	public String toJson() {
