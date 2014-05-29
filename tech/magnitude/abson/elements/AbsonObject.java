@@ -1,5 +1,6 @@
 package tech.magnitude.abson.elements;
 
+import java.util.List;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -60,10 +61,6 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 		put(key, new AbsonArray(arr));
 	}
 	
-	public void put(String key, List<Absonifyable> arr) {
-		put(key, new AbsonArray(arr));
-	}
-	
 	public int getInteger(String key) {
 		return ((Abson32Integer) get(key)).getValue();
 	}
@@ -116,7 +113,7 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 			return;
 		}
 		
-		final JsonPrintSettings nextSettings = new JsonPrintSettings(settings, settings.getIndent() + settings.getStartIndent());
+		final JsonPrintSettings nextSettings = settings.getNextLevel();
 		
 		writer.write(settings.hasWhitespace() ? "{ " : "{");
 		
@@ -136,7 +133,7 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 	protected void toMultilineJson(Writer writer, JsonPrintSettings settings) throws IOException {
 		writer.write("{\n");
 		
-		final JsonPrintSettings nextSettings = new JsonPrintSettings(settings, settings.getIndent() + settings.getStartIndent());
+		final JsonPrintSettings nextSettings = settings.getNextLevel();
 		
 		int count = 0;
 		for (Map.Entry<String, Absonifyable> entry : entrySet()) {

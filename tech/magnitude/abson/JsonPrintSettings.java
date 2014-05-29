@@ -28,16 +28,25 @@ public class JsonPrintSettings {
 		this.roundAmount = roundAmount;
 	}
 	
+	public JsonPrintSettings(JsonPrintSettings old) {
+		startIndent = old.getStartIndent();
+		
+		indent = old.getIndent();
+		multiline = old.isMultiline();
+		
+		whitespace = old.hasWhitespace();
+		
+		roundFractions = old.shouldRoundFractions();
+		roundAmount = old.getRoundAmount();
+	}
+	
 	public JsonPrintSettings(JsonPrintSettings old, int newStartIndent) {
+		this(old);
 		startIndent = newStartIndent;
-		
-		indent = old.indent;
-		multiline = old.multiline;
-		
-		whitespace = old.whitespace;
-		
-		roundFractions = old.roundFractions;
-		roundAmount = old.roundAmount;
+	}
+	
+	public JsonPrintSettings getNextLevel() {
+		return new JsonPrintSettings(this, getStartIndent() + getIndent());
 	}
 	
 	public int getStartIndent() {

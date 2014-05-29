@@ -127,7 +127,7 @@ public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable 
 		boolean first = true;
 		output.write(settings.hasWhitespace() ? "[ " : "[");
 		
-		final JsonPrintSettings nextSettings = new JsonPrintSettings(settings, settings.getIndent() + settings.getStartIndent());
+		final JsonPrintSettings nextSettings = settings.getNextLevel();
 		for (Absonifyable value : this) {
 			if(!first) output.write(settings.hasWhitespace() ? ", " : ",");
 			value.toJson(output, nextSettings);
@@ -142,7 +142,7 @@ public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable 
 		
 		int count = 0;
 		
-		final JsonPrintSettings nextSettings = new JsonPrintSettings(settings, settings.getIndent() + settings.getStartIndent());
+		final JsonPrintSettings nextSettings = settings.getNextLevel();
 		for (Absonifyable value : this) {
 			PrintUtil.indent(output, nextSettings.getStartIndent());
 			
