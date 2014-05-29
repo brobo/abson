@@ -10,7 +10,7 @@ import tech.magnitude.abson.elements.AbsonObject;
 
 public class Test {
 	public static void main(String[] args) throws Exception {
-		if (true) {
+		if (false) {
 			AbsonObject foo = new AbsonObject();
 			foo.put("name", "Colby Brown");
 			foo.put("age", 17);
@@ -19,6 +19,7 @@ public class Test {
 			books.add("A Clockwork Orange");
 			books.add("Moby Dick");
 			foo.put("books", books);
+			//foo.put("isAwesome", true);
 			System.out.println(foo.toJson());
 			System.out.println(AbsonObject.fromJson(foo.toJson()).toJson());
 		}
@@ -49,6 +50,11 @@ public class Test {
 			ByteArrayInputStream flip = new ByteArrayInputStream(stream.toByteArray());
 			AbsonObject goodbye = AbsonObject.fromBson(flip);
 			System.out.println(goodbye.toJson());
+		}
+		
+		if (true) {
+			System.out.println(TestUser.COLBY.decompose().toJson());
+			System.out.println(TestUser.compose(TestUser.TRES.decompose()).decompose().toJson());
 		}
 	}
 }
