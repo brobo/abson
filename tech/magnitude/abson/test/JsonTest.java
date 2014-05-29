@@ -21,6 +21,9 @@ public class JsonTest {
 		arr.add(34);
 		arr.add(35);
 		arr.add("why is a string here? Nobody knows.");
+		arr.add(13.4);
+		arr.add("nope");
+		arr.add("what is going on here?");
 		
 		obj.put("favorite_numbers", arr);
 		
@@ -39,6 +42,6 @@ public class JsonTest {
 		String res = out.toString();
 		
 		JsonParser parser = new JsonParser(new StringReader(res));
-		System.out.println(parser.readObject());
+		System.out.println(parser.readObject().toJson(JsonPrintSettings.PRETTY_DEFAULT));
 	}
 }

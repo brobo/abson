@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.io.Writer;
 
 import tech.magnitude.abson.Absonifyable;
+import tech.magnitude.abson.BsonUtil;
 import tech.magnitude.abson.JsonPrintSettings;
 
 public class AbsonNull implements Absonifyable {
@@ -23,6 +24,7 @@ public class AbsonNull implements Absonifyable {
 		return "null";
 	}
 	
+	@Override
 	public String toString() {
 		return toJson();
 	}
@@ -30,6 +32,14 @@ public class AbsonNull implements Absonifyable {
 	@Override
 	public void toBson(OutputStream stream) throws IOException {
 		return;
+	}
+	
+	public byte[] toBson() {
+		try {
+			return BsonUtil.getArray(this);
+		} catch(Exception ex) {
+			return null; // Shouldn't happen.
+		}
 	}
 
 	@Override

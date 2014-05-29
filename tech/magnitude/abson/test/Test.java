@@ -2,7 +2,6 @@ package tech.magnitude.abson.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
 
 import tech.magnitude.abson.BsonUtil;
 import tech.magnitude.abson.elements.AbsonArray;
@@ -10,7 +9,7 @@ import tech.magnitude.abson.elements.AbsonObject;
 
 public class Test {
 	public static void main(String[] args) throws Exception {
-		if (false) {
+		if (true) {
 			AbsonObject foo = new AbsonObject();
 			foo.put("name", "Colby Brown");
 			foo.put("age", 17);
@@ -50,11 +49,6 @@ public class Test {
 			ByteArrayInputStream flip = new ByteArrayInputStream(stream.toByteArray());
 			AbsonObject goodbye = AbsonObject.fromBson(flip);
 			System.out.println(goodbye.toJson());
-		}
-		
-		if (true) {
-			System.out.println(TestUser.COLBY.decompose().toJson());
-			System.out.println(TestUser.compose(TestUser.TRES.decompose()).decompose().toJson());
 		}
 	}
 }

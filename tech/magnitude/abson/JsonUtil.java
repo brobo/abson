@@ -21,19 +21,6 @@ public class JsonUtil {
 			"^-?[0-9]+([eE][+-]?[0-9]+)?$";
 	
 	public static Absonifyable assignToAbsonifyable(String token) throws AbsonParseException {
-		
-		if (token.startsWith("\"") && token.endsWith("\"")) {
-			return AbsonString.fromJson(token);
-		}
-		
-		if (token.startsWith("[")) {
-			return AbsonArray.fromJson(token);
-		}
-		
-		if (token.startsWith("{")) {
-			return AbsonObject.fromJson(token);
-		}
-		
 		if (token.equals("true") || token.equals("false")) {
 			return AbsonBoolean.fromJson(token);
 		}

@@ -80,7 +80,8 @@ public class JsonParser {
 			
 			char ch = 0x00;
 			while((ch = readChar()) != AbsonConstants.CLOSING_ARRAY) {
-				markChar();
+				if(ch != ',')
+					markChar();
 				
 				eliminateWhitespace();
 				
