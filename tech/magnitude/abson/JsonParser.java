@@ -115,7 +115,7 @@ public class JsonParser {
 		case '"': // Abson string
 			return new AbsonString(readStringLiteral());
 		default: // Some other constant thing.
-			return JsonUtil.assignToAbsonifyable(readToDelimiter());
+			return JsonUtil.assignToAbsonifyable(readToDelimiter().trim());
 		}
 	}
 	

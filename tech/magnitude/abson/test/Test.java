@@ -18,7 +18,8 @@ public class Test {
 			books.add("A Clockwork Orange");
 			books.add("Moby Dick");
 			foo.put("books", books);
-			//foo.put("isAwesome", true);
+			foo.put("isAwesome", true);
+			foo.put("nothing");
 			System.out.println(foo.toJson());
 			System.out.println(AbsonObject.fromJson(foo.toJson()).toJson());
 		}

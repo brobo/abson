@@ -80,6 +80,10 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 		put(key, new AbsonArray(arr));
 	}
 	
+	public void put(String key) {
+		put(key, new AbsonNull());
+	}
+	
 	public int getInteger(String key) {
 		return ((Abson32Integer) get(key)).getValue();
 	}
