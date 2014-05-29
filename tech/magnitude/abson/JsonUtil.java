@@ -5,6 +5,7 @@ import tech.magnitude.abson.elements.Abson64Integer;
 import tech.magnitude.abson.elements.AbsonArray;
 import tech.magnitude.abson.elements.AbsonBoolean;
 import tech.magnitude.abson.elements.AbsonFloatingPoint;
+import tech.magnitude.abson.elements.AbsonNull;
 import tech.magnitude.abson.elements.AbsonObject;
 import tech.magnitude.abson.elements.AbsonString;
 
@@ -31,6 +32,10 @@ public class JsonUtil {
 		
 		if (token.equals("true") || token.equals("false")) {
 			return AbsonBoolean.fromJson(token);
+		}
+		
+		if (token.equals("null")) {
+			return AbsonNull.fromJson(token);
 		}
 		
 		if (token.matches(FLOATING_REGEX)) {

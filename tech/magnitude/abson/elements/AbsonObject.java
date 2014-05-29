@@ -148,6 +148,9 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 			case 0x09:
 				value = AbsonUTCDatetime.fromBson(toRead);
 				break;
+			case 0x0a:
+				value = AbsonNull.fromBson(toRead);
+				break;
 			case 0x10:
 				value = Abson32Integer.fromBson(toRead);
 				break;
