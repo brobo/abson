@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
-import java.util.Arrays;
 
+import tech.magnitude.abson.AbsonParseException;
 import tech.magnitude.abson.Absonifyable;
 import tech.magnitude.abson.BsonUtil;
+import tech.magnitude.abson.JsonParser;
 import tech.magnitude.abson.JsonPrintSettings;
-import tech.magnitude.abson.PrintUtil;
+import tech.magnitude.abson.JsonUtil;
 
 public class AbsonString implements Absonifyable {
 	
@@ -31,6 +32,14 @@ public class AbsonString implements Absonifyable {
 	public void toBson(OutputStream stream) throws IOException {
 		stream.write(BsonUtil.toBinaryString(string));
 	}
+	
+	public byte[] toBson() {
+		try {
+			return BsonUtil.getArray(this);
+		} catch(Exception ex) {
+			return null; // Shouldn't happen.
+		}
+	}
 
 	@Override
 	public void toJson(Writer writer, JsonPrintSettings settings) throws IOException {
@@ -48,12 +57,14 @@ public class AbsonString implements Absonifyable {
 		return string;
 	}
 	
-	public static AbsonString fromJson(String json) {
-		String res = json.substring(1, json.length()-1);
-		/*for (int i=0; i<escapable.length; i++) {
-			res = res.replaceAll("\\" + escapable[i], escapable[i]);
-		}*/
-		return new AbsonString(res);
+	public static AbsonString fromJson(String json) throws AbsonParseException {
+		try {
+			return new AbsonString(new JsonParser(json).readStringLiteral());
+		} catch(AbsonParseException ex) {
+			throw ex;
+		} catch(IOException ex) {
+			return null;
+		}
 	}
 	
 	public static AbsonString fromBson(InputStream stream) throws IOException {
@@ -75,7 +86,7 @@ public class AbsonString implements Absonifyable {
 	}
 	
 	public String toJson(JsonPrintSettings settings) {
-		return PrintUtil.getString(this, settings);
+		return JsonUtil.getString(this, settings);
 	}
 	
 	@Override

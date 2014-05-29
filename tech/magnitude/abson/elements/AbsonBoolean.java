@@ -21,6 +21,14 @@ public class AbsonBoolean implements Absonifyable {
 	public void toBson(OutputStream stream) throws IOException {
 		stream.write(BsonUtil.toBinaryBoolean(value));
 	}
+	
+	public byte[] toBson() {
+		try {
+			return BsonUtil.getArray(this);
+		} catch(Exception ex) {
+			return null; // Shouldn't happen.
+		}
+	}
 
 	@Override
 	public byte getBsonPrefix() {
@@ -50,7 +58,7 @@ public class AbsonBoolean implements Absonifyable {
 	}
 	
 	public static AbsonBoolean fromJson(String json) {
-		return new AbsonBoolean(json.equals("true"));
+		return new AbsonBoolean(json.equalsIgnoreCase("true"));
 	}
 	
 	public static AbsonBoolean fromBson(InputStream stream) throws IOException {

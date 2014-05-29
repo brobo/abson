@@ -10,12 +10,12 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import tech.magnitude.abson.AbsonParseException;
 import tech.magnitude.abson.Absonifyable;
 import tech.magnitude.abson.BsonUtil;
+import tech.magnitude.abson.JsonParser;
 import tech.magnitude.abson.JsonPrintSettings;
-import tech.magnitude.abson.JsonTokenizer;
 import tech.magnitude.abson.JsonUtil;
-import tech.magnitude.abson.PrintUtil;
 
 public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements Absonifyable {
 
@@ -37,6 +37,14 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 		stream.write(BsonUtil.toBinaryInt32(temp.size() + 5));
 		stream.write(temp.toByteArray());
 		stream.write(0x00);
+	}
+	
+	public byte[] toBson() {
+		try {
+			return BsonUtil.getArray(this);
+		} catch(Exception ex) {
+			return null; // Shouldn't happen.
+		}
 	}
 
 	@Override
@@ -105,11 +113,11 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 	}
 	
 	public String toJson() {
-		return PrintUtil.getString(this, JsonPrintSettings.DEFAULT);
+		return JsonUtil.getString(this, JsonPrintSettings.DEFAULT);
 	}
 	
 	public String toJson(JsonPrintSettings settings) {
-		return PrintUtil.getString(this, settings);
+		return JsonUtil.getString(this, settings);
 	}
 	
 	@Override
@@ -165,20 +173,14 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 		return res;
 	}
 	
-	public static AbsonObject fromJson(String token) {
-		JsonTokenizer tokenizer = new JsonTokenizer(token.substring(1, token.length()-1));
-		AbsonObject res = new AbsonObject();
-		while (tokenizer.hasNext()) {
-			String key = tokenizer.getNextToken();
-			if (key.startsWith("\"") && key.endsWith("\"")) {
-				key = key.substring(1, key.length()-1);
-			}
-			tokenizer.pop();
-			Absonifyable value = JsonUtil.assignToAbsonifyable(tokenizer.getNextToken());
-			tokenizer.pop();
-			res.put(key, value);
+	public static AbsonObject fromJson(String token) throws AbsonParseException {
+		try {
+			return new JsonParser(token).readObject();
+		} catch(AbsonParseException ex) {
+			throw ex;
+		} catch(Exception ex) {
+			return null;
 		}
-		return res;
 	}
 
 	@Override
@@ -212,7 +214,7 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 		
 		int count = 0;
 		for (Map.Entry<String, Absonifyable> entry : entrySet()) {
-			PrintUtil.indent(writer, nextSettings.getStartIndent());
+			JsonUtil.indent(writer, nextSettings.getStartIndent());
 			
 			writer.write("\"");
 			writer.write(entry.getKey());
@@ -226,7 +228,7 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 			count++;
 		}
 		
-		PrintUtil.indent(writer, settings.getStartIndent());
+		JsonUtil.indent(writer, settings.getStartIndent());
 		writer.write("}");
 	}
 }

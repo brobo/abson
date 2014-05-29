@@ -9,11 +9,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
+import tech.magnitude.abson.AbsonParseException;
 import tech.magnitude.abson.Absonifyable;
+import tech.magnitude.abson.BsonUtil;
+import tech.magnitude.abson.JsonParser;
 import tech.magnitude.abson.JsonPrintSettings;
-import tech.magnitude.abson.JsonTokenizer;
 import tech.magnitude.abson.JsonUtil;
-import tech.magnitude.abson.PrintUtil;
 
 public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable {
 
@@ -101,6 +102,14 @@ public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable 
 		}
 		obj.toBson(stream);
 	}
+	
+	public byte[] toBson() {
+		try {
+			return BsonUtil.getArray(this);
+		} catch(Exception ex) {
+			return null; // Shouldn't happen.
+		}
+	}
 
 	@Override
 	public byte getBsonPrefix() {
@@ -112,7 +121,7 @@ public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable 
 	}
 	
 	public String toJson(JsonPrintSettings settings) {
-		return PrintUtil.getString(this, settings);
+		return JsonUtil.getString(this, settings);
 	}
 	
 	@Override
@@ -129,16 +138,14 @@ public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable 
 		return res;
 	}
 	
-	public static AbsonArray fromJson(String json) {
-		AbsonArray res = new AbsonArray();
-		if (json.charAt(0) != '[' || json.charAt(json.length()-1) != ']') return res; //TODO throw error
-		JsonTokenizer tokenizer = new JsonTokenizer(json.substring(1, json.length()-1));
-		while (tokenizer.hasNext()) {
-			Absonifyable value = JsonUtil.assignToAbsonifyable(tokenizer.getNextToken());
-			tokenizer.pop();
-			res.add(value);
+	public static AbsonArray fromJson(String json) throws AbsonParseException {
+		try {
+			return new JsonParser(json).readArray();
+		} catch(AbsonParseException ex) {
+			throw ex;
+		} catch (Exception ex) {
+			return null;
 		}
-		return res;
 	}
 	
 	@Override
@@ -168,7 +175,7 @@ public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable 
 		
 		final JsonPrintSettings nextSettings = settings.getNextLevel();
 		for (Absonifyable value : this) {
-			PrintUtil.indent(output, nextSettings.getStartIndent());
+			JsonUtil.indent(output, nextSettings.getStartIndent());
 			
 			value.toJson(output, nextSettings);
 			
@@ -179,7 +186,7 @@ public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable 
 			count++;
 		}
 		
-		PrintUtil.indent(output, settings.getStartIndent());
+		JsonUtil.indent(output, settings.getStartIndent());
 		output.write("]");
 	}
 }

@@ -1,14 +1,16 @@
 package tech.magnitude.abson.test;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 
+import tech.magnitude.abson.JsonParser;
 import tech.magnitude.abson.JsonPrintSettings;
 import tech.magnitude.abson.elements.AbsonArray;
 import tech.magnitude.abson.elements.AbsonObject;
 
 public class JsonTest {
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		AbsonObject obj = new AbsonObject();
 		obj.put("name", "Bobby Tables");
 		obj.put("age", 24);
@@ -29,9 +31,14 @@ public class JsonTest {
 		
 		JsonPrintSettings newPretty = new JsonPrintSettings().setMultiline(true).setWhitespace(true).setRoundFractions(true).setRoundAmount(3);
 		
-		OutputStreamWriter out = new OutputStreamWriter(System.out);
+		Writer out = new StringWriter();
 		obj.toJson(out, newPretty);
 		
 		out.flush();
+		
+		String res = out.toString();
+		
+		JsonParser parser = new JsonParser(new StringReader(res));
+		System.out.println(parser.readObject());
 	}
 }

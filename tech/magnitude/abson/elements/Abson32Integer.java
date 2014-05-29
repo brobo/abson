@@ -21,6 +21,14 @@ public class Abson32Integer implements Absonifyable {
 	public void toBson(OutputStream stream) throws IOException {
 		stream.write(BsonUtil.toBinaryInt32(value));
 	}
+	
+	public byte[] toBson() {
+		try {
+			return BsonUtil.getArray(this);
+		} catch(Exception ex) {
+			return null; // Shouldn't happen.
+		}
+	}
 
 	@Override
 	public byte getBsonPrefix() {

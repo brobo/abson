@@ -34,6 +34,13 @@ public class BsonUtil {
 		return toBinaryCString(source);
 	}
 	
+	public static byte[] getArray(Absonifyable object) throws IOException {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		object.toBson(out);
+		
+		return out.toByteArray();
+	}
+	
 	
 	
 	/* ************** *
