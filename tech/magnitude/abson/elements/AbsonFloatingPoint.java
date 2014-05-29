@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.math.BigInteger;
 
 import tech.magnitude.abson.Absonifyable;
 import tech.magnitude.abson.BsonUtil;
 import tech.magnitude.abson.JsonPrintSettings;
 
-public class AbsonFloatingPoint implements Absonifyable {
+public class AbsonFloatingPoint implements Absonifyable, AbsonNumber<Double> {
 
 	protected double value;
 	
@@ -63,7 +64,27 @@ public class AbsonFloatingPoint implements Absonifyable {
 		return toJson();
 	}
 
-	public double getValue() {
+	public Double getValue() {
 		return value;
+	}
+
+	@Override
+	public int getIntValue() {
+		return getValue().intValue();
+	}
+
+	@Override
+	public long getLongValue() {
+		return getValue().longValue();
+	}
+
+	@Override
+	public BigInteger getBigIntegerValue() {
+		return BigInteger.valueOf(getLongValue());
+	}
+	
+	@Override
+	public double getDoubleValue() {
+		return getValue();
 	}
 }

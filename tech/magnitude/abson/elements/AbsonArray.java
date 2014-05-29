@@ -18,6 +18,11 @@ import tech.magnitude.abson.JsonUtil;
 
 public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5680398373817754508L;
+
 	public AbsonArray() {
 		super();
 	}
@@ -34,64 +39,80 @@ public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable 
 		super(Arrays.asList(initialArray));
 	}
 	
-	public void add(int val) {
-		add(new Abson32Integer(val));
+	public boolean add(Absonifyable obj) {
+		if(obj == null)
+			return super.add(new AbsonNull());
+		else
+			return super.add(obj);
 	}
 	
-	public void add(long val) {
-		add(new Abson64Integer(val));
+	public boolean add(int val) {
+		return super.add(new Abson32Integer(val));
 	}
 	
-	public void add(String val) {
-		add(new AbsonString(val));
+	public boolean add(long val) {
+		return super.add(new Abson64Integer(val));
 	}
 	
-	public void add(double val) {
-		add(new AbsonFloatingPoint(val));
+	public boolean add(String val) {
+		if(val == null)
+			return super.add(new AbsonNull());
+		else
+			return super.add(new AbsonString(val));
 	}
 	
-	public void add(Date date) {
-		add(new AbsonUTCDatetime(date));
+	public boolean add(double val) {
+		return super.add(new AbsonFloatingPoint(val));
 	}
 	
-	public void add(boolean value) {
-		add(new AbsonBoolean(value));
+	public boolean add(Date date) {
+		if(date == null)
+			return super.add(new AbsonNull());
+		else
+			return super.add(new AbsonUTCDatetime(date));
 	}
 	
-	public void add(AbsonArray array) {
-		add(array);
+	public boolean add(boolean value) {
+		return add(new AbsonBoolean(value));
+	}
+	
+	public boolean add(AbsonArray array) {
+		if(array == null)
+			return super.add(new AbsonNull());
+		else
+			return super.add(array);
 	}
 	
 	public int getInteger(int index) {
-		return ((Abson32Integer) get(index)).getValue();
+		return ((AbsonNumber<?>) get(index)).getIntValue();
 	}
 	
 	public long getLong(int index) {
-		return ((Abson64Integer) get(index)).getValue();
+		return ((AbsonNumber<?>) get(index)).getLongValue();
 	}
 	
 	public String getString(int index) {
-		return ((AbsonString) get(index)).getValue();
+		return (String) get(index).getValue();
 	}
 	
 	public double getDouble(int index) {
-		return ((AbsonFloatingPoint) get(index)).getValue();
+		return ((AbsonNumber<?>) get(index)).getDoubleValue();
 	}
 	
 	public Date getDate(int index) {
-		return ((AbsonUTCDatetime) get(index)).getValue();
+		return (Date) get(index).getValue();
 	}
 	
 	public boolean getBoolean(int index) {
-		return ((AbsonBoolean) get(index)).getValue();
+		return (Boolean) get(index).getValue();
 	}
 	
 	public AbsonArray getArray(int index) {
-		return ((AbsonArray) get(index));
+		return (AbsonArray) get(index).getValue();
 	}
 	
 	public AbsonObject getObject(int index) {
-		return (AbsonObject) get(index);
+		return (AbsonObject) get(index).getValue();
 	}
 	
 	@Override
@@ -127,6 +148,11 @@ public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable 
 	@Override
 	public String toString() {
 		return toJson();
+	}
+	
+	@Override
+	public AbsonArray getValue() {
+		return this;
 	}
 	
 	public static AbsonArray fromBson(InputStream stream) throws IOException {

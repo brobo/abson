@@ -54,5 +54,9 @@ public class AbsonNull implements Absonifyable {
 	public static AbsonNull fromJson(String json) {
 		return new AbsonNull();
 	}
+	
+	public Object getValue() {
+		return null;
+	}
 
 }

@@ -53,7 +53,7 @@ public class AbsonBoolean implements Absonifyable {
 		return toJson();
 	}
 	
-	public boolean getValue() {
+	public Boolean getValue() {
 		return value;
 	}
 	

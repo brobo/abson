@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.math.BigInteger;
 
 import tech.magnitude.abson.Absonifyable;
 import tech.magnitude.abson.BsonUtil;
 import tech.magnitude.abson.JsonPrintSettings;
 
-public class Abson64Integer implements Absonifyable {
+public class Abson64Integer implements Absonifyable, AbsonNumber<Long> {
 	
 	protected long value;
 
@@ -53,7 +54,7 @@ public class Abson64Integer implements Absonifyable {
 		return toJson();
 	}
 	
-	public long getValue() {
+	public Long getValue() {
 		return value;
 	}
 	
@@ -65,5 +66,25 @@ public class Abson64Integer implements Absonifyable {
 		byte[] bytes = new byte[8];
 		stream.read(bytes);
 		return new Abson64Integer(BsonUtil.fromBinaryInt64(bytes));
+	}
+
+	@Override
+	public int getIntValue() {
+		return getValue().intValue();
+	}
+
+	@Override
+	public long getLongValue() {
+		return getValue();
+	}
+
+	@Override
+	public BigInteger getBigIntegerValue() {
+		return BigInteger.valueOf(getLongValue());
+	}
+	
+	@Override
+	public double getDoubleValue() {
+		return getValue();
 	}
 }

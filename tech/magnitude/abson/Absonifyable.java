@@ -10,4 +10,6 @@ public interface Absonifyable {
 	
 	void toBson(OutputStream stream) throws IOException;
 	public abstract byte getBsonPrefix();
+	
+	public Object getValue();
 }

@@ -16,6 +16,7 @@ public class JsonTest {
 		obj.put("age", 24);
 		obj.put("occupation", "Database Engineer");
 		obj.put("favorite_decimal", 13.4);
+		obj.put("obj", (String) null);
 		
 		AbsonArray arr = new AbsonArray();
 		arr.add(34);
@@ -24,8 +25,12 @@ public class JsonTest {
 		arr.add(13.4);
 		arr.add("nope");
 		arr.add("what is going on here?");
+		arr.add((AbsonArray) null);
+		
+		AbsonArray nullable = null;
 		
 		obj.put("favorite_numbers", arr);
+		obj.put("hated_numbers", nullable);
 		
 		AbsonObject rec =  new AbsonObject();
 		rec.put("father", "Samuel Tables");
@@ -40,8 +45,15 @@ public class JsonTest {
 		out.flush();
 		
 		String res = out.toString();
+		System.out.println(res);
 		
 		JsonParser parser = new JsonParser(new StringReader(res));
-		System.out.println(parser.readObject().toJson(JsonPrintSettings.PRETTY_DEFAULT));
+		
+		
+		AbsonObject newObj = parser.readObject();
+		System.out.println("Parsed successfully.");
+		System.out.println(newObj.getObject("family"));
+		System.out.println(newObj.getArray("favorite_numbers"));
+		System.out.println(newObj.getArray("hated_numbers"));
 	}
 }

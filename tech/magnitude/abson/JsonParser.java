@@ -125,12 +125,12 @@ public class JsonParser {
 		StringBuffer res = new StringBuffer();
 		
 		char curr = 0x00;
-		while((curr = readChar()) != AbsonConstants.ENTRY_SEPERATOR && curr != AbsonConstants.CLOSING_BRACKET)
+		while((curr = readChar()) != AbsonConstants.ENTRY_SEPERATOR && curr != AbsonConstants.CLOSING_BRACKET && curr != AbsonConstants.CLOSING_ARRAY)
 			res.append(curr);
 		
-		if(curr == AbsonConstants.CLOSING_BRACKET)
+		if(curr == AbsonConstants.CLOSING_BRACKET || curr == AbsonConstants.CLOSING_ARRAY)
 			markChar();
-		
+
 		return res.toString();
 	}
 	

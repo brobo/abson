@@ -19,6 +19,11 @@ import tech.magnitude.abson.JsonUtil;
 
 public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements Absonifyable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2925473832134304270L;
+
 	public AbsonObject() {
 		super();
 	}
@@ -29,11 +34,13 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 	
 	public void toBson(OutputStream stream) throws IOException {
 		ByteArrayOutputStream temp = new ByteArrayOutputStream();
+		
 		for (Map.Entry<String, Absonifyable> entry : entrySet()) {
 			temp.write(entry.getValue().getBsonPrefix());
 			temp.write(BsonUtil.toBinaryCString(entry.getKey()));
 			entry.getValue().toBson(temp);
 		}
+		
 		stream.write(BsonUtil.toBinaryInt32(temp.size() + 5));
 		stream.write(temp.toByteArray());
 		stream.write(0x00);
@@ -52,68 +59,88 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 		return 0x03;
 	}
 	
-	public void put(String key, String value) {
-		put(key, new AbsonString(value));
+	@Override
+	public Object getValue() {
+		return this;
 	}
 	
-	public void put(String key, int value) {
-		put(key, new Abson32Integer(value));
+	public Absonifyable put(String key, Absonifyable abs) {
+		if(abs == null)
+			return put(key, new AbsonNull());
+		else
+			return super.put(key, abs);
 	}
 	
-	public void put(String key, long value) {
-		put(key, new Abson64Integer(value));
+	public Absonifyable put(String key, String value) {
+		if(value == null)
+			return put(key, new AbsonNull());
+		else
+			return put(key, new AbsonString(value));
 	}
 	
-	public void put(String key, boolean value) {
-		put(key, new AbsonBoolean(value));
+	public Absonifyable put(String key, int value) {
+		return put(key, new Abson32Integer(value));
 	}
 	
-	public void put(String key, double value) {
-		put(key, new AbsonFloatingPoint(value));
+	public Absonifyable put(String key, long value) {
+		return put(key, new Abson64Integer(value));
 	}
 	
-	public void put(String key, Date date) {
-		put(key, new AbsonUTCDatetime(date));
+	public Absonifyable put(String key, boolean value) {
+		return put(key, new AbsonBoolean(value));
 	}
 	
-	public void put(String key, Absonifyable[] arr) {
-		put(key, new AbsonArray(arr));
+	public Absonifyable put(String key, double value) {
+		return put(key, new AbsonFloatingPoint(value));
 	}
 	
-	public void put(String key) {
-		put(key, new AbsonNull());
+	public Absonifyable put(String key, Date date) {
+		if(date == null)
+			return put(key, new AbsonNull());
+		else
+			return put(key, new AbsonUTCDatetime(date));
 	}
 	
-	public int getInteger(String key) {
-		return ((Abson32Integer) get(key)).getValue();
+	public Absonifyable put(String key, Absonifyable[] arr) {
+		if(arr == null)
+			return put(key, new AbsonNull());
+		else
+			return put(key, new AbsonArray(arr));
+	}
+	public Absonifyable put(String key) {
+		return put(key, new AbsonNull());
+	}
+
+	public Integer getInteger(String key) {
+		return ((AbsonNumber<?>) get(key)).getIntValue();
 	}
 	
-	public long getLong(String key) {
-		return ((Abson64Integer) get(key)).getValue();
+	public Long getLong(String key) {
+		return ((AbsonNumber<?>) get(key)).getLongValue();
 	}
 	
-	public double getDouble(String key) {
-		return ((AbsonFloatingPoint) get(key)).getValue();
+	public Double getDouble(String key) {
+		return ((AbsonNumber<?>) get(key)).getDoubleValue();
 	}
 	
 	public AbsonArray getArray(String key) {
-		return (AbsonArray) get(key);
+		return (AbsonArray) get(key).getValue();
 	}
 	
-	public boolean getBoolean(String key) {
-		return ((AbsonBoolean) get(key)).getValue();	
+	public Boolean getBoolean(String key) {
+		return (Boolean) get(key).getValue();
 	}
 	
 	public String getString(String key) {
-		return ((AbsonString) get(key)).getValue();
+		return (String) get(key).getValue();
 	}
 	
 	public AbsonObject getObject(String key) {
-		return (AbsonObject) get(key);
+		return (AbsonObject) get(key).getValue();
 	}
 	
 	public Date getDate(String key) {
-		return ((AbsonUTCDatetime) get(key)).getValue();
+		return (Date) get(key).getValue();
 	}
 	
 	public String toJson() {
