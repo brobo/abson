@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import tech.magnitude.abson.AbsonDecomposable;
 import tech.magnitude.abson.AbsonParseException;
 import tech.magnitude.abson.Absonifyable;
 import tech.magnitude.abson.BsonUtil;
@@ -109,6 +110,10 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 	}
 	public Absonifyable put(String key) {
 		return put(key, new AbsonNull());
+	}
+	
+	public Absonifyable put(String key, AbsonDecomposable object) {
+		return this.put(key, object.decompose());
 	}
 
 	public Integer getInteger(String key) {

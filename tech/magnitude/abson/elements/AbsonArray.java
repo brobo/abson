@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
+import tech.magnitude.abson.AbsonDecomposable;
 import tech.magnitude.abson.AbsonParseException;
 import tech.magnitude.abson.Absonifyable;
 import tech.magnitude.abson.BsonUtil;
@@ -81,6 +82,14 @@ public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable 
 			return super.add(new AbsonNull());
 		else
 			return super.add(array);
+	}
+	
+	public boolean add() {
+		return super.add(new AbsonNull());
+	}
+	
+	public boolean add(AbsonDecomposable object) {
+		return this.add(object.decompose());
 	}
 	
 	public int getInteger(int index) {
