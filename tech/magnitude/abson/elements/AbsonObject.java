@@ -186,6 +186,9 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 			case 0x04:
 				value = AbsonArray.fromBson(toRead);
 				break;
+			case 0x05:
+				value = AbsonBinary.fromBson(toRead);
+				break;
 			case 0x08:
 				value = AbsonBoolean.fromBson(toRead);
 				break;
