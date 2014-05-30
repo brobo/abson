@@ -24,13 +24,26 @@ public class AbsonFactory {
 		composers.put(_class, composer);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public <T extends AbsonDecomposable> T compose(Class<T> _class, AbsonObject object) {
-		return (T)composers.get(_class).compose(object);
+		return getComposer(_class).compose(object);
 	}
 	
 	@SuppressWarnings("unchecked")
 	public <T extends AbsonDecomposable> T compose(String className, AbsonObject object) {
 		return (T)compose(classNames.get(className), object);
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected <T extends AbsonDecomposable> AbsonComposer<T> getComposer(Class<T> _class) {
+		return (AbsonComposer<T>)composers.get(_class);
+	}
+	
+	protected AbsonComposer<? extends AbsonDecomposable> getComposer(String className) {
+		return getComposer(classNames.get(className));
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected <T extends AbsonDecomposable> AbsonComposer<T> getComposer(Class<T> _class, String className) {
+		return (AbsonComposer<T>)composers.get(className);
 	}
 }
