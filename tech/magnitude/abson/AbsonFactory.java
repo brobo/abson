@@ -6,12 +6,10 @@ import java.util.Map;
 import tech.magnitude.abson.elements.AbsonObject;
 
 public class AbsonFactory {
-	
-	
 	private Map<Class<? extends AbsonDecomposable>, AbsonComposer<? extends AbsonDecomposable>> composers;
 	private Map<String, Class<? extends AbsonDecomposable>> classNames;
 	
-	private AbsonFactory() {
+	public AbsonFactory() {
 		composers = new HashMap<>();
 		classNames = new HashMap<>();
 	}
