@@ -3,10 +3,12 @@ package tech.magnitude.abson.test;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Arrays;
 
 import tech.magnitude.abson.JsonParser;
 import tech.magnitude.abson.JsonPrintSettings;
 import tech.magnitude.abson.elements.AbsonArray;
+import tech.magnitude.abson.elements.AbsonBinary;
 import tech.magnitude.abson.elements.AbsonObject;
 
 public class JsonTest {
@@ -17,6 +19,7 @@ public class JsonTest {
 		obj.put("occupation", "Database Engineer");
 		obj.put("favorite_decimal", 13.4);
 		obj.put("obj", (String) null);
+		obj.put("binaryStuff", new byte[] { 13, 4, -6, -128, -1, 14, 17, 37, 19, 26, -4 });
 		
 		AbsonArray arr = new AbsonArray();
 		arr.add(34);
@@ -37,7 +40,7 @@ public class JsonTest {
 		rec.put("mother", "Amanda Tables");
 		obj.put("family", rec);
 		
-		JsonPrintSettings newPretty = new JsonPrintSettings().setMultiline(true).setWhitespace(true).setRoundFractions(true).setRoundAmount(3);
+		JsonPrintSettings newPretty = new JsonPrintSettings().setMultiline(true).setWhitespace(true).setRoundDecimals(true).setRoundAmount(3);
 		
 		Writer out = new StringWriter();
 		obj.toJson(out, newPretty);
@@ -49,11 +52,11 @@ public class JsonTest {
 		
 		JsonParser parser = new JsonParser(new StringReader(res));
 		
-		
 		AbsonObject newObj = parser.readObject();
 		System.out.println("Parsed successfully.");
 		System.out.println(newObj.getObject("family"));
 		System.out.println(newObj.getArray("favorite_numbers"));
 		System.out.println(newObj.getArray("hated_numbers"));
+		System.out.println(Arrays.toString(newObj.getBinary("binaryStuff")));
 	}
 }

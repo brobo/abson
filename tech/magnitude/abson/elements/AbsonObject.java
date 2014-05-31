@@ -115,6 +115,10 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 	public Absonifyable put(String key, AbsonDecomposable object) {
 		return this.put(key, object.decompose());
 	}
+	
+	public Absonifyable put(String key, byte[] array) {
+		return this.put(key, new AbsonBinary(array));
+	}
 
 	public Integer getInteger(String key) {
 		return ((AbsonNumber<?>) get(key)).getIntValue();
@@ -146,6 +150,10 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 	
 	public Date getDate(String key) {
 		return (Date) get(key).getValue();
+	}
+	
+	public byte[] getBinary(String key) {
+		return (byte[]) get(key).getValue();
 	}
 	
 	public String toJson() {

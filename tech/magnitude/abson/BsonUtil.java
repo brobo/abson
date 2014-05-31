@@ -8,6 +8,11 @@ import java.nio.ByteBuffer;
 
 public class BsonUtil {
 
+	/**
+	 * Converts a String to its byte representation.
+	 * @param source The string to convert.
+	 * @return The converted byte array.
+	 */
 	public static byte[] toBinaryCString(String source) {
 		byte[] bytes = new byte[0];
 		try {
@@ -21,6 +26,12 @@ public class BsonUtil {
 		return res;
 	}
 	
+	/**
+	 * Converts a String to its byte representation via toBinaryCString(), then prefixes
+	 * the String with its length.
+	 * @param source The String to convert.
+	 * @return The converted byte array.
+	 */
 	public static byte[] toBinaryString(String source) {
 		byte[] bytes = toBinaryCString(source);
 		byte[] res = new byte[bytes.length + 4];
@@ -29,19 +40,28 @@ public class BsonUtil {
 		return res;
 	}
 	
+	/**
+	 * Alias for toBinaryCString.
+	 * @param source The string to convert.
+	 * @return The converted byte array.
+	 */
 	public static byte[] toBinaryEString(String source) {
 		//alias for cstring
 		return toBinaryCString(source);
 	}
 	
+	/**
+	 * Obtains a byte array which contains the BSON representation of a specified Abson object.
+	 * @param object The object to convert to its BSON representation.
+	 * @return A byte array containing the BSON representation of the object.
+	 * @throws IOException Thrown if an error occurs while converting the object to BSON. (Though this should never happen)
+	 */
 	public static byte[] getArray(Absonifyable object) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		object.toBson(out);
 		
 		return out.toByteArray();
 	}
-	
-	
 	
 	/* ************** *
 	 * * Primitives * *

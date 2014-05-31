@@ -94,6 +94,10 @@ public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable 
 		return this.add(object.decompose());
 	}
 	
+	public boolean add(byte[] binary) {
+		return this.add(new AbsonBinary(binary));
+	}
+	
 	public int getInteger(int index) {
 		return ((AbsonNumber<?>) get(index)).getIntValue();
 	}

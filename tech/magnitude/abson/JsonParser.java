@@ -1,11 +1,13 @@
 package tech.magnitude.abson;
 
+import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
 import tech.magnitude.abson.elements.AbsonArray;
+import tech.magnitude.abson.elements.AbsonBinary;
 import tech.magnitude.abson.elements.AbsonObject;
 import tech.magnitude.abson.elements.AbsonString;
 
@@ -18,14 +20,28 @@ public class JsonParser {
 	private char backupChar;
 	private boolean charMarked = false;
 	
+	/**
+	 * Constructs a JsonParser which will read from a specified reader.
+	 * @param read The reader to read from.
+	 */
 	public JsonParser(Reader read) {
 		reader = read;
 	}
 	
+	/**
+	 * Constructs a JsonParser which will read from a the specified string.
+	 * @param string The string to read from.
+	 */
 	public JsonParser(String string) {
 		reader = new StringReader(string);
 	}
 	
+	/**
+	 * Reads an AbsonObject from the provided reader or string.
+	 * @return The AbsonObject which was read.
+	 * @throws IOException Thrown if an IO error occurs on the provided reader.
+	 * @throws AbsonParseException Thrown if the JSON is incorrectly formatted.
+	 */
 	public AbsonObject readObject() throws IOException, AbsonParseException {
 		// First, find the opening bracket.
 		eliminateWhitespace();
@@ -65,6 +81,12 @@ public class JsonParser {
 		return res;
 	}
 	
+	/**
+	 * Reads an AbsonArray from the provided reader or string.
+	 * @return The AbsonArray which was read.
+	 * @throws IOException Thrown if an IO error occurs on the provided reader.
+	 * @throws AbsonParseException Thrown if the JSON is incorrectly formatted.
+	 */
 	public AbsonArray readArray() throws IOException, AbsonParseException {
 		eliminateWhitespace();
 		
@@ -80,7 +102,7 @@ public class JsonParser {
 			
 			char ch = 0x00;
 			while((ch = readChar()) != AbsonConstants.CLOSING_ARRAY) {
-				if(ch != ',')
+				if(ch != AbsonConstants.ENTRY_SEPERATOR)
 					markChar();
 				
 				eliminateWhitespace();
@@ -100,6 +122,49 @@ public class JsonParser {
 		return res;
 	}
 	
+	/**
+	 * Reads a binary literal from the provided reader or string.
+	 * @return The binary literal that was read.
+	 * @throws IOException Thrown if an IO exception occurs on the provided reader.
+	 * @throws AbsonParseException Thrown if the following object is not a binary literal or is improperly formatted.
+	 */
+	public AbsonBinary readBinary() throws IOException, AbsonParseException {
+		eliminateWhitespace();
+		if(readChar() != AbsonConstants.BINARY_OPENER) {
+			markChar();
+			throw new AbsonParseException("The next JSON object is not a binary literal.");
+		}
+		
+		if(readChar() != AbsonConstants.STRING_DELIMITER) {
+			markChar();
+			throw new AbsonParseException("The next JSON object does not suggest a binary literal.");
+		}
+		
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		try {
+			eliminateWhitespace();
+			
+			char test = 0x00;
+			while((test = readChar()) != AbsonConstants.STRING_DELIMITER) {
+				markChar();
+				buffer.write(JsonUtil.getBase64Bytes(readBinaryPart(4)));
+			}
+			
+		} catch(EOFException ex) {
+			throw new AbsonParseException("The JSON import was malformed as the end of the reader was reached.");
+		} catch(IOException ex) {
+			throw ex;
+		}
+		
+		return new AbsonBinary(buffer.toByteArray());
+	}
+	
+	/**
+	 * Reads a generic JSON value from the provided reader or string.
+	 * @return The generic JSON value which was obtained - will be one of the abson.elements.* objects.
+	 * @throws IOException Thrown if an IO error occurs on the provided reader.
+	 * @throws AbsonParseException Thrown if an Absonifyable object could not be deduced from the input.
+	 */
 	public Absonifyable readAbsonifyableValue() throws IOException, AbsonParseException {
 		eliminateWhitespace();
 		
@@ -108,17 +173,25 @@ public class JsonParser {
 		markChar();
 		
 		switch(nextChar) {
-		case '{': // Abson Object
+		case AbsonConstants.OPENING_BRACKET: // Abson Object
 			return readObject();
-		case '[': // Abson array
+		case AbsonConstants.OPENING_ARRAY: // Abson array
 			return readArray();
-		case '"': // Abson string
+		case AbsonConstants.STRING_DELIMITER: // Abson string
 			return new AbsonString(readStringLiteral());
+		case AbsonConstants.BINARY_OPENER: // Abson Binary data (converted to base 64 and so on).
+			return readBinary();
 		default: // Some other constant thing.
 			return JsonUtil.assignToAbsonifyable(readToDelimiter().trim());
 		}
 	}
 	
+	/**
+	 * Reads until a delimiter (one of ", }, or }) is reached, and returns what was read.
+	 * @return A String representing what was read.
+	 * @throws IOException Thrown if an IO error occurs on the provided reader.
+	 * @throws AbsonParseException Thrown if an Absonifyable object could not be deduced from the input.
+	 */
 	public String readToDelimiter() throws IOException, AbsonParseException {
 		eliminateWhitespace();
 		
@@ -134,9 +207,13 @@ public class JsonParser {
 		return res.toString();
 	}
 	
+	/**
+	 * Reads a string literal from the provided reader or string.
+	 * @return The string literal that was read.
+	 * @throws IOException Thrown if an IO error occurs on the provided reader.
+	 * @throws AbsonParseException Thrown if the next JSON object was not a string literal or was improperly formatted.
+	 */
 	public String readStringLiteral() throws IOException, AbsonParseException {
-		eliminateWhitespace();
-		
 		if(readChar() != AbsonConstants.STRING_DELIMITER) {
 			markChar();
 			throw new AbsonParseException("The next character in the reader did not imply a string literal.");
@@ -144,7 +221,10 @@ public class JsonParser {
 		
 		StringBuilder buffer = new StringBuilder();
 		char curr = 0x00, last = 0x00;
-		while((curr = readChar()) != AbsonConstants.STRING_DELIMITER && last != '\\') {
+		while((curr = readChar()) != AbsonConstants.STRING_DELIMITER && last != AbsonConstants.ESCAPE_CHARACTER) {
+			if(last == AbsonConstants.ESCAPE_CHARACTER && curr == AbsonConstants.STRING_DELIMITER)
+				buffer.deleteCharAt(buffer.length() - 1);
+			
 			buffer.append(curr);
 			last = curr;
 		}
@@ -152,12 +232,40 @@ public class JsonParser {
 		return buffer.toString();
 	}
 	
+	/**
+	 * Reads a portion of a Base64 binary literal to be converted back to binary.
+	 * @param chars The amount of characters to read; usually 3 (as Base64 is being used).
+	 * @return The characters which were read.
+	 * @throws IOException Thrown if an IO error occurs on the provided reader.
+	 */
+	public char[] readBinaryPart(int chars) throws IOException {
+		StringBuilder buffer = new StringBuilder();
+		char curr = 0x00;
+		while(buffer.length() < chars && (curr = readChar()) != AbsonConstants.STRING_DELIMITER) {
+			buffer.append(curr);
+		}
+		
+		return buffer.toString().toCharArray();
+	}
+	
+	/**
+	 * Eliminates whitespace from the reader, such that the head of the stream is now the
+	 * first non-whitespace character.
+	 * @throws IOException Thrown if an IO error occurs on the provided reader.
+	 */
 	public void eliminateWhitespace() throws IOException {
 		while(Character.isWhitespace(readChar()));
 		
 		markChar();
 	}
 	
+	/**
+	 * Reads a character from the provided reader; if a character has been marked,
+	 * this function will return that character rather than actually read from the
+	 * stream.
+	 * @return The read character.
+	 * @throws IOException Thrown if an IO error occurs on the provided reader.
+	 */
 	public char readChar() throws IOException {
 		if(charMarked) {
 			charMarked = false;
@@ -169,7 +277,27 @@ public class JsonParser {
 		return backupChar = (char) charInt;
 	}
 	
+	/**
+	 * Marks the last read character, such that the next invocation of readChar() will
+	 * return the last read character instead of the next character in the Reader.
+	 */
 	public void markChar() {
 		charMarked = true;
+	}
+	
+	/**
+	 * Obtains whether or not a character has been marked for re-reading.
+	 * @return Whether or not a character has been marked for re-reading.
+	 */
+	public boolean isCharMarked() {
+		return charMarked;
+	}
+	
+	/**
+	 * Returns the marked character as by markChar(), or 0x00 if no character has been marked.
+	 * @return The marked character as by markChar().
+	 */
+	public char getMarkedChar() {
+		return backupChar;
 	}
 }

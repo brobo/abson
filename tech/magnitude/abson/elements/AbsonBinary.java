@@ -5,9 +5,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 
+import tech.magnitude.abson.AbsonConstants;
 import tech.magnitude.abson.Absonifyable;
 import tech.magnitude.abson.BsonUtil;
 import tech.magnitude.abson.JsonPrintSettings;
+import tech.magnitude.abson.JsonUtil;
 
 public class AbsonBinary implements Absonifyable {
 
@@ -19,7 +21,22 @@ public class AbsonBinary implements Absonifyable {
 	
 	@Override
 	public void toJson(Writer writer, JsonPrintSettings settings) throws IOException {
-		
+		writer.write(AbsonConstants.BINARY_OPENER + "" + AbsonConstants.STRING_DELIMITER);
+		JsonUtil.writeBase64(writer, data);
+		writer.write(AbsonConstants.STRING_DELIMITER);
+	}
+	
+	public String toJson() {
+		return toJson(JsonPrintSettings.DEFAULT);
+	}
+	
+	public String toJson(JsonPrintSettings settings) {
+		return JsonUtil.getString(this, settings);
+	}
+	
+	@Override
+	public String toString() {
+		return toJson();
 	}
 
 	@Override
@@ -35,7 +52,7 @@ public class AbsonBinary implements Absonifyable {
 	}
 
 	@Override
-	public Object getValue() {
+	public byte[] getValue() {
 		return data;
 	}
 	

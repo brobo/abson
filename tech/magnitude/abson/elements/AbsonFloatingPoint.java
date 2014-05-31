@@ -46,7 +46,7 @@ public class AbsonFloatingPoint implements Absonifyable, AbsonNumber<Double> {
 	}
 	
 	public String toJson(JsonPrintSettings settings) {
-		return settings.shouldRoundFractions() ? String.format("%." + settings.getRoundAmount() + "f", value) : Double.toString(value);
+		return settings.shouldRoundDecimals() ? String.format("%." + settings.getRoundAmount() + "f", value) : Double.toString(value);
 	}
 	
 	public static AbsonFloatingPoint fromBson(InputStream stream) throws IOException {
