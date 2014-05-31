@@ -5,19 +5,17 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 
+import tech.magnitude.abson.AbsonConstants;
 import tech.magnitude.abson.AbsonParseException;
-import tech.magnitude.abson.Absonifyable;
+import tech.magnitude.abson.AbsonValue;
 import tech.magnitude.abson.BsonUtil;
 import tech.magnitude.abson.JsonParser;
 import tech.magnitude.abson.JsonPrintSettings;
 import tech.magnitude.abson.JsonUtil;
 
-public class AbsonString implements Absonifyable {
+public class AbsonString implements AbsonValue {
 	
 	protected String string;
-	
-	public static final String[] escapable = {"\"", "\\\\", "/", "\b", "\f", "\n", "\r", "\t"};
-	public static final String[] escaped = {"\\\"", "\\\\", "\\/", "\\b", "\\f", "\\n", "\\r", "\\t"};
 	
 	public AbsonString(String value) {
 		this.string = value;
@@ -43,14 +41,14 @@ public class AbsonString implements Absonifyable {
 
 	@Override
 	public void toJson(Writer writer, JsonPrintSettings settings) throws IOException {
-		String res = string;
-		for (int i=0; i<escapable.length; i++) {
-			res = res.replaceAll(escapable[i], escaped[i]);
+		writer.write(AbsonConstants.STRING_DELIMITER);
+		for(int x = 0; x < string.length(); x++) {
+			char ch = string.charAt(x);
+			if(JsonUtil.shouldEscape(ch))
+				writer.write(AbsonConstants.ESCAPE_CHARACTER);
+			writer.write(ch);
 		}
-		
-		writer.write("\"");
-		writer.write(res);
-		writer.write("\"");
+		writer.write(AbsonConstants.STRING_DELIMITER);
 	}
 	
 	public String getValue() {

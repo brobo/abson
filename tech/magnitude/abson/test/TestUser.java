@@ -2,7 +2,7 @@ package tech.magnitude.abson.test;
 
 import tech.magnitude.abson.AbsonComposer;
 import tech.magnitude.abson.AbsonDecomposable;
-import tech.magnitude.abson.Absonifyable;
+import tech.magnitude.abson.AbsonValue;
 import tech.magnitude.abson.elements.AbsonArray;
 import tech.magnitude.abson.elements.AbsonObject;
 

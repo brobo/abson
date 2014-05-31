@@ -5,21 +5,21 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 import tech.magnitude.abson.AbsonComposer;
+import tech.magnitude.abson.AbsonConstants;
 import tech.magnitude.abson.AbsonDecomposable;
 import tech.magnitude.abson.AbsonParseException;
-import tech.magnitude.abson.Absonifyable;
+import tech.magnitude.abson.AbsonValue;
 import tech.magnitude.abson.BsonUtil;
 import tech.magnitude.abson.JsonParser;
 import tech.magnitude.abson.JsonPrintSettings;
 import tech.magnitude.abson.JsonUtil;
 
-public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable {
+public class AbsonArray extends ArrayList<AbsonValue> implements AbsonValue {
 
 	/**
 	 * 
@@ -30,19 +30,15 @@ public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable 
 		super();
 	}
 	
-	public AbsonArray(Collection<? extends Absonifyable> collection) {
+	public AbsonArray(Collection<? extends AbsonValue> collection) {
 		super(collection);
 	}
 	
 	public AbsonArray(int initialCapacity) {
 		super(initialCapacity);
 	}
-	
-	public AbsonArray(Absonifyable[] initialArray) {
-		super(Arrays.asList(initialArray));
-	}
-	
-	public boolean add(Absonifyable obj) {
+
+	public boolean add(AbsonValue obj) {
 		if(obj == null)
 			return super.add(new AbsonNull());
 		else
@@ -170,10 +166,71 @@ public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable 
 		return this;
 	}
 	
+	/**
+	 * Returns a list with entries of specified type. Note that this function is
+	 * only practical for homogenous lists with primitive objects that can be stored by the Abson library;
+	 * for complex objects, use asList(AbsonComposer<T>).
+	 * 
+	 * This function is capable of converting between wrapper classes internally.
+	 * @param targetType The type to attempt to cast all objects to.
+	 * @return A list containing the casted objects.
+	 */
+	public <T> List<T> asList(Class<T> targetType) {
+		List<T> res = new ArrayList<T>();
+		
+		for(AbsonValue object : this) {
+			Object value = object.getValue();
+			res.add(object instanceof AbsonNumber ? JsonUtil.castNumber((Number) value, targetType) : targetType.cast(value));
+		}
+		
+		return res;
+	}
+	
+	/**
+	 * Fills a list with the objects in this AbsonArray by attempting to
+	 * cast all of their values to the lists' type.
+	 * 
+	 * This function is capable of converting between wrapper classes internally.
+	 * @param list The list to fill.
+	 */
+	public <T> void fillList(List<T> list, Class<T> targetType) {
+		for(AbsonValue object : this) {
+			Object value = object.getValue();
+			list.add(object instanceof AbsonNumber ? JsonUtil.castNumber((Number) value, targetType) : targetType.cast(value));
+		}
+	}
+	
+	/**
+	 * Returns a list with entries created by applying the composer on all
+	 * AbsonObjects in this array. Elements which are not AbsonObjects are
+	 * ignored (rather than throwing an error).
+	 * @param composer The composer to apply to all AbsonObjects.
+	 * @return A list containing the composed objects.
+	 */
+	public <T extends AbsonDecomposable> List<T> asList(AbsonComposer<T> composer) {
+		List<T> res = new ArrayList<T>();
+		for(AbsonValue object : this)
+			if(object instanceof AbsonObject) res.add(composer.compose((AbsonObject) object));
+		
+		return res;
+	}
+	
+	/**
+	 * Fills a list with the objects in this AbsonArray by applying the
+	 * provided composer to all of the AbsonObjects in this array; other values
+	 * are ignored.
+	 * @param list The list to fill.
+	 * @param composer The composer to apply.
+	 */
+	public <T extends AbsonDecomposable> void fillList(List<T> list, AbsonComposer<T> composer) {
+		for(AbsonValue object : this)
+			if(object instanceof AbsonObject) list.add(composer.compose((AbsonObject) object));
+	}
+	
 	public static AbsonArray fromBson(InputStream stream) throws IOException {
 		AbsonObject temp = AbsonObject.fromBson(stream);
 		AbsonArray res = new AbsonArray();
-		for (Absonifyable value : temp.values()) {
+		for (AbsonValue value : temp.values()) {
 			res.add(value);
 		}
 		return res;
@@ -197,37 +254,42 @@ public class AbsonArray extends ArrayList<Absonifyable> implements Absonifyable 
 		}
 		
 		boolean first = true;
-		output.write(settings.hasWhitespace() ? "[ " : "[");
+		output.write(AbsonConstants.OPENING_ARRAY);
+		if(settings.hasWhitespace()) output.write(" ");
 		
 		final JsonPrintSettings nextSettings = settings.getNextLevel();
-		for (Absonifyable value : this) {
-			if(!first) output.write(settings.hasWhitespace() ? ", " : ",");
+		for (AbsonValue value : this) {
+			if(!first) {
+				output.write(AbsonConstants.ENTRY_SEPERATOR);
+				if(settings.hasWhitespace()) output.write(" ");
+			}
 			value.toJson(output, nextSettings);
 			first = false;
 		}
 		
-		output.write(settings.hasWhitespace() ? " ]" : "]");
+		if(settings.hasWhitespace()) output.write(" ");
+		output.write(AbsonConstants.CLOSING_ARRAY);
 	}
 	
 	protected void toMultilineJson(Writer output, JsonPrintSettings settings) throws IOException {
-		output.write("[\n");
+		output.write(AbsonConstants.OPENING_ARRAY + "\n");
 		
 		int count = 0;
 		
 		final JsonPrintSettings nextSettings = settings.getNextLevel();
-		for (Absonifyable value : this) {
+		for (AbsonValue value : this) {
 			JsonUtil.indent(output, nextSettings.getStartIndent());
 			
 			value.toJson(output, nextSettings);
 			
 			if(count != this.size() - 1)
-				output.write(",");
+				output.write(AbsonConstants.ENTRY_SEPERATOR);
 			output.write("\n");
 			
 			count++;
 		}
 		
 		JsonUtil.indent(output, settings.getStartIndent());
-		output.write("]");
+		output.write(AbsonConstants.CLOSING_ARRAY);
 	}
 }

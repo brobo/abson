@@ -2,9 +2,9 @@ package tech.magnitude.abson.elements;
 
 import java.math.BigInteger;
 
-import tech.magnitude.abson.Absonifyable;
+import tech.magnitude.abson.AbsonValue;
 
-public interface AbsonNumber<T> extends Absonifyable {
+public interface AbsonNumber<T> extends AbsonValue {
 	public int getIntValue();
 	public long getLongValue();
 	public BigInteger getBigIntegerValue();

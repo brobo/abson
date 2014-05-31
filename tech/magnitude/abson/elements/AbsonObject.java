@@ -10,15 +10,17 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import tech.magnitude.abson.AbsonComposer;
+import tech.magnitude.abson.AbsonConstants;
 import tech.magnitude.abson.AbsonDecomposable;
 import tech.magnitude.abson.AbsonParseException;
-import tech.magnitude.abson.Absonifyable;
+import tech.magnitude.abson.AbsonValue;
 import tech.magnitude.abson.BsonUtil;
 import tech.magnitude.abson.JsonParser;
 import tech.magnitude.abson.JsonPrintSettings;
 import tech.magnitude.abson.JsonUtil;
 
-public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements Absonifyable {
+public class AbsonObject extends LinkedHashMap<String, AbsonValue> implements AbsonValue {
 
 	/**
 	 * 
@@ -29,14 +31,14 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 		super();
 	}
 	
-	public AbsonObject(Map<String, ? extends Absonifyable> map) {
+	public AbsonObject(Map<String, ? extends AbsonValue> map) {
 		super(map);
 	}
 	
 	public void toBson(OutputStream stream) throws IOException {
 		ByteArrayOutputStream temp = new ByteArrayOutputStream();
 		
-		for (Map.Entry<String, Absonifyable> entry : entrySet()) {
+		for (Map.Entry<String, AbsonValue> entry : entrySet()) {
 			temp.write(entry.getValue().getBsonPrefix());
 			temp.write(BsonUtil.toBinaryCString(entry.getKey()));
 			entry.getValue().toBson(temp);
@@ -65,58 +67,46 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 		return this;
 	}
 	
-	public Absonifyable put(String key, Absonifyable abs) {
-		if(abs == null)
+	public AbsonValue put(String key, AbsonValue abs) {
+		if(abs == null || (!(abs instanceof AbsonNull) && abs.getValue() == null))
 			return put(key, new AbsonNull());
 		else
 			return super.put(key, abs);
 	}
 	
-	public Absonifyable put(String key, String value) {
-		if(value == null)
-			return put(key, new AbsonNull());
-		else
-			return put(key, new AbsonString(value));
+	public AbsonValue put(String key, String value) {
+		return put(key, new AbsonString(value));
 	}
 	
-	public Absonifyable put(String key, int value) {
+	public AbsonValue put(String key, int value) {
 		return put(key, new Abson32Integer(value));
 	}
 	
-	public Absonifyable put(String key, long value) {
+	public AbsonValue put(String key, long value) {
 		return put(key, new Abson64Integer(value));
 	}
 	
-	public Absonifyable put(String key, boolean value) {
+	public AbsonValue put(String key, boolean value) {
 		return put(key, new AbsonBoolean(value));
 	}
 	
-	public Absonifyable put(String key, double value) {
+	public AbsonValue put(String key, double value) {
 		return put(key, new AbsonFloatingPoint(value));
 	}
 	
-	public Absonifyable put(String key, Date date) {
-		if(date == null)
-			return put(key, new AbsonNull());
-		else
-			return put(key, new AbsonUTCDatetime(date));
+	public AbsonValue put(String key, Date date) {
+		return put(key, new AbsonUTCDatetime(date));
 	}
 	
-	public Absonifyable put(String key, Absonifyable[] arr) {
-		if(arr == null)
-			return put(key, new AbsonNull());
-		else
-			return put(key, new AbsonArray(arr));
-	}
-	public Absonifyable put(String key) {
+	public AbsonValue put(String key) {
 		return put(key, new AbsonNull());
 	}
 	
-	public Absonifyable put(String key, AbsonDecomposable object) {
-		return this.put(key, object.decompose());
+	public AbsonValue put(String key, AbsonDecomposable object) {
+		return put(key, object.decompose());
 	}
 	
-	public Absonifyable put(String key, byte[] array) {
+	public AbsonValue put(String key, byte[] array) {
 		return this.put(key, new AbsonBinary(array));
 	}
 
@@ -156,6 +146,63 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 		return (byte[]) get(key).getValue();
 	}
 	
+	/**
+	 * Creates a map based on the information contained in this AbsonObject;
+	 * all values are casted to the specified class, if possible.
+	 * 
+	 * This function can internally convert numerical values (eg Long -> Integer).
+	 * @param input The map to fill.
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> void fillMap(Map<String, T> input, Class<T> targetType) {
+		for(Map.Entry<String, AbsonValue> values : this.entrySet()) {
+			AbsonValue object = values.getValue();
+			Object value = object.getValue();
+			T res = object instanceof AbsonNumber ? JsonUtil.castNumber((Number) value, targetType) : targetType.cast(value);
+			input.put(values.getKey(), res);
+		}
+	}
+	
+	/**
+	 * Filles the provided map based on the information contained in this AbsonObject;
+	 * all values are casted to the specified class, if possible; the keys are
+	 * parsed as integers.
+	 * @param input The map to fill.
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> void fillIntMap(Map<Integer, T> input, Class<T> targetType) {
+		for(Map.Entry<String, AbsonValue> values : this.entrySet()) {
+			AbsonValue object = values.getValue();
+			Object value = object.getValue();
+			T res = object instanceof AbsonNumber ? JsonUtil.castNumber((Number) value, targetType) : targetType.cast(value);
+			input.put(Integer.parseInt(values.getKey()), res);
+		}
+	}
+	
+	/**
+	 * Fills the provided map with key value pairs created from applying
+	 * the composer on the AbsonObjects contained in this object.
+	 * Any objects which are not AbsonObjects are ignored. 
+	 * @param input The map to fill.
+	 * @param composer The composer to be applied to the AbsonObjects.
+	 */
+	public <T extends AbsonDecomposable> void fillMap(Map<String, T> input, AbsonComposer<T> composer) {
+		for(Map.Entry<String, AbsonValue> values : this.entrySet())
+			if(values.getValue() instanceof AbsonObject) input.put(values.getKey(), composer.compose((AbsonObject) values.getValue()));
+	}
+	
+	/**
+	 * Fills the provided map with key value pairs created from applying
+	 * the composer on the AbsonObjects contained in this object, parsing the keys as integers.
+	 * Any objects which are not AbsonObjects are ignored. 
+	 * @param input The map to fill.
+	 * @param composer The composer to be applied to the AbsonObjects.
+	 */
+	public <T extends AbsonDecomposable> void fillIntMap(Map<Integer, T> input, AbsonComposer<T> composer) {
+		for(Map.Entry<String, AbsonValue> values : this.entrySet())
+			if(values.getValue() instanceof AbsonObject) input.put(Integer.parseInt(values.getKey()), composer.compose((AbsonObject) values.getValue()));
+	}
+	
 	public String toJson() {
 		return JsonUtil.getString(this, JsonPrintSettings.DEFAULT);
 	}
@@ -180,7 +227,7 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 		while (toRead.available() > 1) {
 			int type = toRead.read();
 			String name = BsonUtil.readCString(toRead);
-			Absonifyable value;
+			AbsonValue value;
 			switch (type) {
 			case 0x01:
 				value = AbsonFloatingPoint.fromBson(toRead);
@@ -243,43 +290,54 @@ public class AbsonObject extends LinkedHashMap<String, Absonifyable> implements 
 		
 		final JsonPrintSettings nextSettings = settings.getNextLevel();
 		
-		writer.write(settings.hasWhitespace() ? "{ " : "{");
+		writer.write(AbsonConstants.OPENING_BRACKET);
+		writer.write(settings.hasWhitespace() ? " " : "");
 		
 		boolean first = true;
-		for (Map.Entry<String, Absonifyable> entry : entrySet()) {
-			if(!first) writer.write(settings.hasWhitespace() ? ", " : ",");
-			writer.write("\"");
+		for (Map.Entry<String, AbsonValue> entry : entrySet()) {
+			if(!first) {
+				writer.write(AbsonConstants.ENTRY_SEPERATOR);
+				if(settings.hasWhitespace()) writer.write(" ");
+			}
+			
+			writer.write(AbsonConstants.STRING_DELIMITER);
 			writer.write(entry.getKey());
-			writer.write(settings.hasWhitespace() ? "\": " : "\":");
+			
+			writer.write(AbsonConstants.STRING_DELIMITER + "" + AbsonConstants.KEY_VALUE_SEPERATOR);
+			if(settings.hasWhitespace()) writer.write(" ");
+			
 			entry.getValue().toJson(writer, nextSettings);
 			first = false;
 		}
 		
-		writer.write(settings.hasWhitespace() ? " }" : "}");
+		if(settings.hasWhitespace()) writer.write(" ");
+		writer.write(AbsonConstants.CLOSING_BRACKET);
 	}
 	
 	protected void toMultilineJson(Writer writer, JsonPrintSettings settings) throws IOException {
-		writer.write("{\n");
+		writer.write(AbsonConstants.OPENING_BRACKET + "\n");
 		
 		final JsonPrintSettings nextSettings = settings.getNextLevel();
 		
 		int count = 0;
-		for (Map.Entry<String, Absonifyable> entry : entrySet()) {
+		for (Map.Entry<String, AbsonValue> entry : entrySet()) {
 			JsonUtil.indent(writer, nextSettings.getStartIndent());
 			
-			writer.write("\"");
+			writer.write(AbsonConstants.STRING_DELIMITER);
 			writer.write(entry.getKey());
-			writer.write(settings.hasWhitespace() ? "\": " : "\":");
+			writer.write(AbsonConstants.STRING_DELIMITER + "" + AbsonConstants.KEY_VALUE_SEPERATOR);
+			if(settings.hasWhitespace()) writer.write(" ");
+			
 			entry.getValue().toJson(writer, nextSettings);
 			
 			if(count != this.size() - 1)
-				writer.write(",");
+				writer.write(AbsonConstants.ENTRY_SEPERATOR);
 			writer.write("\n");
 			
 			count++;
 		}
 		
 		JsonUtil.indent(writer, settings.getStartIndent());
-		writer.write("}");
+		writer.write(AbsonConstants.CLOSING_BRACKET);
 	}
 }

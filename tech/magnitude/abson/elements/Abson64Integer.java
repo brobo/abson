@@ -6,11 +6,11 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.math.BigInteger;
 
-import tech.magnitude.abson.Absonifyable;
+import tech.magnitude.abson.AbsonValue;
 import tech.magnitude.abson.BsonUtil;
 import tech.magnitude.abson.JsonPrintSettings;
 
-public class Abson64Integer implements Absonifyable, AbsonNumber<Long> {
+public class Abson64Integer implements AbsonValue, AbsonNumber<Long> {
 	
 	protected long value;
 

@@ -5,11 +5,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 
-import tech.magnitude.abson.Absonifyable;
+import tech.magnitude.abson.AbsonValue;
 import tech.magnitude.abson.BsonUtil;
 import tech.magnitude.abson.JsonPrintSettings;
 
-public class AbsonNull implements Absonifyable {
+public class AbsonNull implements AbsonValue {
 
 	@Override
 	public void toJson(Writer writer, JsonPrintSettings settings) throws IOException {

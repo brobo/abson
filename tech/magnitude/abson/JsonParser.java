@@ -67,7 +67,7 @@ public class JsonParser {
 				
 				eliminateWhitespace();
 				
-				Absonifyable value = readAbsonifyableValue();
+				AbsonValue value = readAbsonifyableValue();
 				res.put(key, value);
 				
 				eliminateWhitespace();
@@ -107,7 +107,7 @@ public class JsonParser {
 				
 				eliminateWhitespace();
 				
-				Absonifyable object = readAbsonifyableValue();
+				AbsonValue object = readAbsonifyableValue();
 				res.add(object);
 				
 				eliminateWhitespace();
@@ -144,8 +144,7 @@ public class JsonParser {
 		try {
 			eliminateWhitespace();
 			
-			char test = 0x00;
-			while((test = readChar()) != AbsonConstants.STRING_DELIMITER) {
+			while(readChar() != AbsonConstants.STRING_DELIMITER) {
 				markChar();
 				buffer.write(JsonUtil.getBase64Bytes(readBinaryPart(4)));
 			}
@@ -165,7 +164,7 @@ public class JsonParser {
 	 * @throws IOException Thrown if an IO error occurs on the provided reader.
 	 * @throws AbsonParseException Thrown if an Absonifyable object could not be deduced from the input.
 	 */
-	public Absonifyable readAbsonifyableValue() throws IOException, AbsonParseException {
+	public AbsonValue readAbsonifyableValue() throws IOException, AbsonParseException {
 		eliminateWhitespace();
 		
 		// This is an interesting function; we check the first character to determine what our course of action will be.
@@ -221,13 +220,32 @@ public class JsonParser {
 		
 		StringBuilder buffer = new StringBuilder();
 		char curr = 0x00, last = 0x00;
-		while((curr = readChar()) != AbsonConstants.STRING_DELIMITER && last != AbsonConstants.ESCAPE_CHARACTER) {
-			if(last == AbsonConstants.ESCAPE_CHARACTER && curr == AbsonConstants.STRING_DELIMITER)
+		boolean justEscaped = false, stepped = false;
+
+		// Attempt 2
+		do {
+			curr = readChar();
+			
+			boolean escape = JsonUtil.shouldEscape(curr) && last == AbsonConstants.ESCAPE_CHARACTER;
+			
+			if(escape && !justEscaped) {
 				buffer.deleteCharAt(buffer.length() - 1);
+				justEscaped = true;
+			}
+			else if(curr == AbsonConstants.STRING_DELIMITER)
+				break;
 			
 			buffer.append(curr);
+			
 			last = curr;
-		}
+			
+			if(justEscaped && !stepped)
+				stepped = true;
+			else if(justEscaped && stepped) {
+				justEscaped = false;
+				stepped = false;
+			}
+		} while(true);
 		
 		return buffer.toString();
 	}

@@ -9,7 +9,7 @@ import java.io.Writer;
  * in order to be properly formatted.
  * @author blacksmithgu
  */
-public interface Absonifyable {
+public interface AbsonValue {
 	/**
 	 * Writes the JSON representation of this object out to the specified writer with the specified settings.
 	 * @param writer The writer to write the JSON representation to.

@@ -6,12 +6,12 @@ import java.io.OutputStream;
 import java.io.Writer;
 
 import tech.magnitude.abson.AbsonConstants;
-import tech.magnitude.abson.Absonifyable;
+import tech.magnitude.abson.AbsonValue;
 import tech.magnitude.abson.BsonUtil;
 import tech.magnitude.abson.JsonPrintSettings;
 import tech.magnitude.abson.JsonUtil;
 
-public class AbsonBinary implements Absonifyable {
+public class AbsonBinary implements AbsonValue {
 
 	byte[] data;
 	

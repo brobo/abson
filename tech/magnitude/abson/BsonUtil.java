@@ -56,7 +56,7 @@ public class BsonUtil {
 	 * @return A byte array containing the BSON representation of the object.
 	 * @throws IOException Thrown if an error occurs while converting the object to BSON. (Though this should never happen)
 	 */
-	public static byte[] getArray(Absonifyable object) throws IOException {
+	public static byte[] getArray(AbsonValue object) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		object.toBson(out);
 		

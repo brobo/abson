@@ -5,11 +5,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 
-import tech.magnitude.abson.Absonifyable;
+import tech.magnitude.abson.AbsonValue;
 import tech.magnitude.abson.BsonUtil;
 import tech.magnitude.abson.JsonPrintSettings;
 
-public class AbsonBoolean implements Absonifyable {
+public class AbsonBoolean implements AbsonValue {
 
 	protected boolean value;
 	

@@ -1,17 +1,17 @@
 package tech.magnitude.abson;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import tech.magnitude.abson.elements.Abson32Integer;
 import tech.magnitude.abson.elements.Abson64Integer;
 import tech.magnitude.abson.elements.AbsonBoolean;
 import tech.magnitude.abson.elements.AbsonFloatingPoint;
 import tech.magnitude.abson.elements.AbsonNull;
-import tech.magnitude.abson.elements.AbsonObject;
 
 public class JsonUtil {
 	
@@ -21,6 +21,24 @@ public class JsonUtil {
 	private static final String INTEGER_REGEX =
 			"^-?[0-9]+([eE][+-]?[0-9]+)?$";
 	
+	private static final char[] ESCAPED = { '\\', '"' };
+	private static final HashSet<Character> FAST_ESCAPED;
+	
+	static {
+		FAST_ESCAPED = new HashSet<>();
+		for(char c : ESCAPED)
+			FAST_ESCAPED.add(c);
+	}
+	
+	/**
+	 * Returns whether or not the character should be escaped by a backslash if it is to be contained in a string literal.
+	 * @param c The character to check.
+	 * @return Whether or not the character should be escaped if it is in a string literal.
+	 */
+	public static boolean shouldEscape(char c) {
+		return FAST_ESCAPED.contains(c);
+	}
+	
 	/**
 	 * Attempts to deduce an Absonifyable object which does not have special syntax
 	 * based on the provided token.
@@ -28,7 +46,7 @@ public class JsonUtil {
 	 * @return The Absonifyable object which was deduced.
 	 * @throws AbsonParseException Thrown if an object could not be deduced.
 	 */
-	public static Absonifyable assignToAbsonifyable(String token) throws AbsonParseException {
+	public static AbsonValue assignToAbsonifyable(String token) throws AbsonParseException {
 		if (token.equals("true") || token.equals("false")) {
 			return AbsonBoolean.fromJson(token);
 		}
@@ -49,9 +67,7 @@ public class JsonUtil {
 				return Abson64Integer.fromJson(token);
 			}
 		}
-		
-		return new AbsonObject();
-		
+		throw new AbsonParseException("The token '" + token + "' could not be parsed.");
 	}
 	
 	/**
@@ -75,7 +91,7 @@ public class JsonUtil {
 	 * @param settings The settings to use when obtaining the JSON representation.
 	 * @return The JSON representation of the passed object.
 	 */
-	public static String getString(Absonifyable object, JsonPrintSettings settings) {
+	public static String getString(AbsonValue object, JsonPrintSettings settings) {
 		try {
 			StringWriter writer = new StringWriter();
 			object.toJson(writer, settings);
@@ -95,6 +111,79 @@ public class JsonUtil {
 	public static void indent(Writer writer, int spaces) throws IOException {
 		for(int x = 0; x < spaces; x++)
 			writer.write(" ");
+	}
+	
+	// NUMERICAL CASTING (COOL STUFF)
+	private static interface Caster {
+		public Object cast(Number number);
+	}
+	
+	private static HashMap<Class<?>, Caster> numericalCasts;
+	
+	static {
+		numericalCasts = new HashMap<>();
+		numericalCasts.put(Integer.class, new Caster() {
+
+			@Override
+			public Object cast(Number number) {
+				return number.intValue();
+			}
+			
+		});
+		
+		numericalCasts.put(Long.class, new Caster() {
+			@Override
+			public Object cast(Number number) {
+				return number.longValue();
+			}
+		});
+		
+		numericalCasts.put(Short.class, new Caster() {
+			@Override
+			public Object cast(Number number) {
+				return number.shortValue();
+			}
+		});
+		
+		numericalCasts.put(Byte.class, new Caster() {
+			@Override
+			public Object cast(Number number) {
+				return number.byteValue();
+			}
+		});
+		
+		numericalCasts.put(BigInteger.class, new Caster() {
+			@Override
+			public Object cast(Number number) {
+				return BigInteger.valueOf(number.longValue());
+			}
+		});
+		
+		numericalCasts.put(Float.class, new Caster() {
+			@Override
+			public Object cast(Number number) {
+				return number.floatValue();
+			}
+		});
+		
+		numericalCasts.put(Double.class, new Caster() {
+			@Override
+			public Object cast(Number number) {
+				return number.doubleValue();
+			}
+		});
+		
+		numericalCasts.put(Number.class, new Caster() {
+			@Override
+			public Object cast(Number number) {
+				return number;
+			}
+		});
+	}
+	
+	public static <T> T castNumber(Number number, Class<T> target) {
+		if(number.getClass().equals(target)) return target.cast(number);
+		return target.cast(numericalCasts.get(target).cast(number));
 	}
 	
 	/**
@@ -132,24 +221,18 @@ public class JsonUtil {
 				writer.write(getBase64Char(temp, 12));
 				writer.write(getBase64Char(temp, 6));
 				writer.write(getBase64Char(temp, 0));
-				
-				System.out.printf("%24s%n", Integer.toBinaryString(temp));
 			} else if(available == 2) {
 				int temp = arr[offset] << 16 & 0xffffff | arr[offset + 1] << 8 & 0xffff;
 				writer.write(getBase64Char(temp, 18));
 				writer.write(getBase64Char(temp, 12));
 				writer.write(getBase64Char(temp, 6));
 				writer.write('=');
-				
-				System.out.printf("%24s%n", Integer.toBinaryString(temp));
 			} else if(available == 1) { 
 				int temp = arr[offset] << 16 & 0xffffff;
 				writer.write(getBase64Char(temp, 18));
 				writer.write(getBase64Char(temp, 12));
 				writer.write('=');
 				writer.write('=');
-				
-				System.out.printf("%24s%n", Integer.toBinaryString(temp));
 			}
 		}
 	}
@@ -163,8 +246,6 @@ public class JsonUtil {
 			res = (res | Base64Lookup[chars[read]]) << 6;
 		}
 		res >>>= 6;
-		
-		System.out.printf("%24s%n", Integer.toBinaryString(res));
 		
 		switch(read) {
 		case 2:
