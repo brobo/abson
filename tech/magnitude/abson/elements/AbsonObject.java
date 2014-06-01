@@ -305,7 +305,7 @@ public class AbsonObject extends LinkedHashMap<String, AbsonValue> implements Ab
 
 	@Override
 	public void toJson(Writer writer, JsonPrintSettings settings) throws IOException {
-		if(settings.isMultiline() && this.size() > 1) {
+		if(settings.isMultiline() && this.size() > 0) {
 			toMultilineJson(writer, settings);
 			return;
 		}

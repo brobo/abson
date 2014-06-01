@@ -258,7 +258,7 @@ public class AbsonArray extends ArrayList<AbsonValue> implements AbsonValue {
 	
 	@Override
 	public void toJson(Writer output, JsonPrintSettings settings) throws IOException {
-		if(settings.isMultiline() && this.size() > 1) {
+		if(settings.isMultiline() && this.size() > 0) {
 			toMultilineJson(output, settings);
 			return;
 		}
@@ -282,7 +282,7 @@ public class AbsonArray extends ArrayList<AbsonValue> implements AbsonValue {
 	}
 	
 	protected void toMultilineJson(Writer output, JsonPrintSettings settings) throws IOException {
-		output.write(AbsonConstants.OPENING_ARRAY);
+		output.write(AbsonConstants.OPENING_ARRAY + "\n");
 		
 		int count = 0;
 		
