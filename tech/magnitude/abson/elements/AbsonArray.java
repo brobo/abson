@@ -26,12 +26,22 @@ public class AbsonArray extends ArrayList<AbsonValue> implements AbsonValue {
 	 */
 	private static final long serialVersionUID = 5680398373817754508L;
 
+	public static AbsonArray fromCollection(Collection<? extends AbsonDecomposable> coll) {
+		return new AbsonArray(coll);
+	}
+	
 	public AbsonArray() {
 		super();
 	}
 	
-	public AbsonArray(Collection<? extends AbsonValue> collection) {
-		super(collection);
+	public AbsonArray(Collection<? extends AbsonDecomposable> collection) {
+		super();
+		for(AbsonDecomposable decomp : collection)
+			add(decomp);
+	}
+	
+	public AbsonArray(AbsonArray old) {
+		super(old);
 	}
 	
 	public AbsonArray(int initialCapacity) {
@@ -193,7 +203,7 @@ public class AbsonArray extends ArrayList<AbsonValue> implements AbsonValue {
 	 * This function is capable of converting between wrapper classes internally.
 	 * @param list The list to fill.
 	 */
-	public <T> void fillList(List<T> list, Class<T> targetType) {
+	public <T> void fillCollection(Collection<T> list, Class<T> targetType) {
 		for(AbsonValue object : this) {
 			Object value = object.getValue();
 			list.add(object instanceof AbsonNumber ? JsonUtil.castNumber((Number) value, targetType) : targetType.cast(value));
@@ -222,7 +232,7 @@ public class AbsonArray extends ArrayList<AbsonValue> implements AbsonValue {
 	 * @param list The list to fill.
 	 * @param composer The composer to apply.
 	 */
-	public <T extends AbsonDecomposable> void fillList(List<T> list, AbsonComposer<T> composer) {
+	public <T extends AbsonDecomposable> void fillCollection(Collection<T> list, AbsonComposer<T> composer) {
 		for(AbsonValue object : this)
 			if(object instanceof AbsonObject) list.add(composer.compose((AbsonObject) object));
 	}
@@ -248,7 +258,7 @@ public class AbsonArray extends ArrayList<AbsonValue> implements AbsonValue {
 	
 	@Override
 	public void toJson(Writer output, JsonPrintSettings settings) throws IOException {
-		if(settings.isMultiline()) {
+		if(settings.isMultiline() && this.size() > 1) {
 			toMultilineJson(output, settings);
 			return;
 		}
@@ -272,7 +282,7 @@ public class AbsonArray extends ArrayList<AbsonValue> implements AbsonValue {
 	}
 	
 	protected void toMultilineJson(Writer output, JsonPrintSettings settings) throws IOException {
-		output.write(AbsonConstants.OPENING_ARRAY + "\n");
+		output.write(AbsonConstants.OPENING_ARRAY);
 		
 		int count = 0;
 		

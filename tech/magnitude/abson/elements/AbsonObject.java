@@ -27,12 +27,31 @@ public class AbsonObject extends LinkedHashMap<String, AbsonValue> implements Ab
 	 */
 	private static final long serialVersionUID = 2925473832134304270L;
 
+	public static AbsonObject fromIntMap(Map<Integer, ? extends AbsonDecomposable> map) {
+		AbsonObject res = new AbsonObject();
+		
+		for(Map.Entry<Integer, ? extends AbsonDecomposable> obj : map.entrySet())
+			res.put("" + obj.getKey(), obj.getValue());
+		
+		return res;
+	}
+	
+	public static AbsonObject fromMap(Map<String, ? extends AbsonDecomposable> map) {
+		AbsonObject res = new AbsonObject();
+		
+		for(Map.Entry<String, ? extends AbsonDecomposable> obj : map.entrySet())
+			res.put(obj.getKey(), obj.getValue());
+		
+		return res;
+	}
+	
+	
 	public AbsonObject() {
 		super();
 	}
 	
-	public AbsonObject(Map<String, ? extends AbsonValue> map) {
-		super(map);
+	public AbsonObject(AbsonObject old) {
+		super(old);
 	}
 	
 	public void toBson(OutputStream stream) throws IOException {
@@ -103,7 +122,10 @@ public class AbsonObject extends LinkedHashMap<String, AbsonValue> implements Ab
 	}
 	
 	public AbsonValue put(String key, AbsonDecomposable object) {
-		return put(key, object.decompose());
+		if(object == null)
+			return put(key, new AbsonNull());
+		else
+			return put(key, object.decompose());
 	}
 	
 	public AbsonValue put(String key, byte[] array) {
@@ -283,7 +305,7 @@ public class AbsonObject extends LinkedHashMap<String, AbsonValue> implements Ab
 
 	@Override
 	public void toJson(Writer writer, JsonPrintSettings settings) throws IOException {
-		if(settings.isMultiline()) {
+		if(settings.isMultiline() && this.size() > 1) {
 			toMultilineJson(writer, settings);
 			return;
 		}
