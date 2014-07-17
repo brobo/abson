@@ -42,7 +42,7 @@ public class AbsonBinary implements AbsonValue {
 	@Override
 	public void toBson(OutputStream stream) throws IOException {
 		stream.write(BsonUtil.toBinaryInt32(data.length));
-		stream.write(0x00);
+		// stream.write(0x00);
 		stream.write(data);
 	}
 

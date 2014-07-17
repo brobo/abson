@@ -82,8 +82,17 @@ public class AbsonObject extends LinkedHashMap<String, AbsonValue> implements Ab
 	}
 	
 	@Override
+	public AbsonValue get(Object key) {
+		return super.get(key) == null ? new AbsonNull() : super.get(key);
+	}
+	
+	@Override
 	public Object getValue() {
 		return this;
+	}
+	
+	public Object getValue(String key) {
+		return get(key).getValue();
 	}
 	
 	public AbsonValue put(String key, AbsonValue abs) {
@@ -131,40 +140,53 @@ public class AbsonObject extends LinkedHashMap<String, AbsonValue> implements Ab
 	public AbsonValue put(String key, byte[] array) {
 		return this.put(key, new AbsonBinary(array));
 	}
+	
+	public boolean isNull(String key) {
+		return !containsKey(key) || get(key).getValue() == null;
+	}
 
 	public Integer getInteger(String key) {
+		if(isNull(key)) return null;
 		return ((AbsonNumber<?>) get(key)).getIntValue();
 	}
 	
 	public Long getLong(String key) {
+		if(isNull(key)) return null;
 		return ((AbsonNumber<?>) get(key)).getLongValue();
 	}
 	
 	public Double getDouble(String key) {
+		if(isNull(key)) return null;
 		return ((AbsonNumber<?>) get(key)).getDoubleValue();
 	}
 	
 	public AbsonArray getArray(String key) {
+		if(isNull(key)) return null;
 		return (AbsonArray) get(key).getValue();
 	}
 	
 	public Boolean getBoolean(String key) {
+		if(isNull(key)) return null;
 		return (Boolean) get(key).getValue();
 	}
 	
 	public String getString(String key) {
+		if(isNull(key)) return null;
 		return (String) get(key).getValue();
 	}
 	
 	public AbsonObject getObject(String key) {
+		if(isNull(key)) return null;
 		return (AbsonObject) get(key).getValue();
 	}
 	
 	public Date getDate(String key) {
+		if(isNull(key)) return null;
 		return (Date) get(key).getValue();
 	}
 	
 	public byte[] getBinary(String key) {
+		if(isNull(key)) return null;
 		return (byte[]) get(key).getValue();
 	}
 	

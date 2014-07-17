@@ -47,6 +47,14 @@ public class AbsonArray extends ArrayList<AbsonValue> implements AbsonValue {
 	public AbsonArray(int initialCapacity) {
 		super(initialCapacity);
 	}
+	
+	public Object getValue(int index) {
+		return get(index).getValue();
+	}
+	
+	public boolean isNull(int index) {
+		return index < 0 || index >= size() || get(index).getValue() == null;
+	}
 
 	public boolean add(AbsonValue obj) {
 		if(obj == null)
@@ -121,6 +129,7 @@ public class AbsonArray extends ArrayList<AbsonValue> implements AbsonValue {
 	}
 	
 	public Date getDate(int index) {
+		if(isNull(index)) return null;
 		return (Date) get(index).getValue();
 	}
 	
@@ -129,10 +138,12 @@ public class AbsonArray extends ArrayList<AbsonValue> implements AbsonValue {
 	}
 	
 	public AbsonArray getArray(int index) {
+		if(isNull(index)) return null;
 		return (AbsonArray) get(index).getValue();
 	}
 	
 	public AbsonObject getObject(int index) {
+		if(isNull(index)) return null;
 		return (AbsonObject) get(index).getValue();
 	}
 	
